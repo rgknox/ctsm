@@ -938,12 +938,14 @@ sub setup_cmdl_fire_light_res {
        add_default($opts, $nl_flags->{'inputdata_rootdir'}, $definition, $defaults, $nl, 'fire_method');
     }
     my $fire_method = remove_leading_and_trailing_quotes( $nl->get_value('fire_method') );
-    if ( defined($fire_method) && ! &value_is_true($nl_flags->{'use_cn'}) ) {
-       $log->fatal_error("fire_method is being set even though bgc is NOT cn or bgc.");
-    }
+#   if ( defined($fire_method) && ! &value_is_true($nl_flags->{'use_cn'}) ) {
+#      $log->fatal_error("fire_method is being set even though bgc is NOT cn or bgc.");
+#   }
     if ( defined($fire_method) && $fire_method eq "nofire" ) {
        $nl_flags->{$var} = ".false.";
     } elsif ( &value_is_true($nl->get_value('use_cn')) ) {
+       $nl_flags->{$var} = ".true.";
+    } elsif ( &value_is_true($nl->get_value('use_fates_spitfire')) ) {
        $nl_flags->{$var} = ".true.";
     } else {
        $nl_flags->{$var} = ".false.";

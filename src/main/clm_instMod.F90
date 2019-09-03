@@ -32,6 +32,7 @@ module clm_instMod
   use AerosolMod                      , only : aerosol_type
   use CanopyStateType                 , only : canopystate_type
   use ch4Mod                          , only : ch4_type
+  use SFMainMod                       , only : sfmain_type
   use CNVegetationFacade              , only : cn_vegetation_type
   use SoilBiogeochemStateType         , only : soilbiogeochem_state_type
   use SoilBiogeochemCarbonFluxType    , only : soilbiogeochem_carbonflux_type
@@ -143,6 +144,7 @@ module clm_instMod
   type(vocemis_type)                      :: vocemis_inst
   type(fireemis_type)                     :: fireemis_inst
   type(drydepvel_type)                    :: drydepvel_inst
+  type(sfmain_type)                       :: sfmain_inst
 
   ! FATES
   type(hlm_fates_interface_type)          :: clm_fates
@@ -430,6 +432,9 @@ contains
 
     if (use_crop) then
        call crop_inst%InitAccBuffer(bounds)
+    end if
+    if (use_fates) then
+       call sfmain_inst%InitAccBuffer(bounds)
     end if
 
     call print_accum_fields()

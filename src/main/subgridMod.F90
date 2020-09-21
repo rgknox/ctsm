@@ -87,6 +87,11 @@ contains
     call subgrid_get_info_natveg(gi, npatches_temp, ncols_temp, nlunits_temp)
     call accumulate_counters()
 
+    ! Call this after the natveg call because we allocate space for
+    ! FATES cohorts based on the number of naturaly vegetated columns
+    ! and nothing else
+    call subgrid_get_info_cohort(gi, ncols_temp, ncohorts)
+    
     call subgrid_get_info_urban_tbd(gi, npatches_temp, ncols_temp, nlunits_temp)
     call accumulate_counters()
 
@@ -109,7 +114,7 @@ contains
     call subgrid_get_info_crop(gi, npatches_temp, ncols_temp, nlunits_temp)
     call accumulate_counters()
    
-    call subgrid_get_info_cohort(gi, ncols_temp, ncohorts)
+    
 
   contains
     subroutine accumulate_counters

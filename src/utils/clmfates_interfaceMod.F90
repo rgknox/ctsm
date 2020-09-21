@@ -1108,7 +1108,7 @@ module CLMFatesInterfaceMod
       type(fates_bounds_type) :: fates_clump
       integer                 :: c   ! HLM column index
       integer                 :: s   ! Fates site index
-      integer                 :: g   ! grid-cell index
+      integer                 :: s0  ! global site offset for the current clump
       integer                 :: dk_index
       integer                 :: nlevsoil
       character(len=fates_long_string_length) :: ioname
@@ -1172,13 +1172,18 @@ module CLMFatesInterfaceMod
          do nc = 1,nclumps
 
             call get_clump_bounds(nc, bounds_clump)
+
+            ! This index "s0" is the number of fates sites that came before the first
+            ! site on this clump.
+            
+            s0 = floor(real(bounds_clump%begCohort,r8)/real(fates_maxElementsPerSite,r8))
+            
             allocate(this%fates_restart%restart_map(nc)%site_index(this%fates(nc)%nsites))
             allocate(this%fates_restart%restart_map(nc)%cohort1_index(this%fates(nc)%nsites))            
             do s=1,this%fates(nc)%nsites
                c = this%f2hmap(nc)%fcolumn(s)
-               this%fates_restart%restart_map(nc)%site_index(s)   = c
-               g = col%gridcell(c)
-               this%fates_restart%restart_map(nc)%cohort1_index(s) = (g-1)*fates_maxElementsPerSite + 1
+               this%fates_restart%restart_map(nc)%site_index(s)    = c
+               this%fates_restart%restart_map(nc)%cohort1_index(s) = (s+s0-1)*fates_maxElementsPerSite + 1
             end do
             
          end do

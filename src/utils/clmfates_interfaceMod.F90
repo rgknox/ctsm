@@ -1368,8 +1368,8 @@ module CLMFatesInterfaceMod
                   
                   c = this%f2hmap(nc)%fcolumn(s)
 
-                  this%fates(nc)%bc_in(s)%max_rooting_depth_index_col = &
-                       min(this%fates(nc)%bc_in(s)%nlevsoil, active_layer_inst%altmax_lastyear_indx_col(c))
+                  ! (RGK-B4B) this%fates(nc)%bc_in(s)%max_rooting_depth_index_col = &
+                  !     min(this%fates(nc)%bc_in(s)%nlevsoil, active_layer_inst%altmax_lastyear_indx_col(c))
                   
                   call ed_update_site( this%fates(nc)%sites(s), &
                         this%fates(nc)%bc_in(s), & 

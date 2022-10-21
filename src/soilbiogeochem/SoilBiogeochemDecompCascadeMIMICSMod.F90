@@ -856,8 +856,6 @@ contains
     real(r8):: spinup_geogterm_s3(bounds%begc:bounds%endc) ! geographically-varying spinup term for s3
     real(r8):: spinup_geogterm_m1(bounds%begc:bounds%endc)  ! geographically-varying spinup term for m1
     real(r8):: spinup_geogterm_m2(bounds%begc:bounds%endc)  ! geographically-varying spinup term for m2
-    real(r8):: annsum_npp_col_local(bounds%begc:bounds%endc)  ! local annual sum of NPP at the column level
-    real(r8):: annsum_npp(bounds%begp:bounds%endp)  ! local annual sum of NPP at the patch level
     real(r8):: annsum_npp_col_scalar  ! annual sum of NPP, scalar in column-level loop
 
     !-----------------------------------------------------------------------
@@ -1115,42 +1113,21 @@ contains
       ! If FATES-MIMICS, then use FATES copy of annsum_npp.
       ! The FATES copy of annsum_npp is available when use_lch4 = .true., so
       ! we limit FATES-MIMICS to if (use_lch4).
-      fates_if: if (use_fates) then
-         lch4_if: if (use_lch4) then
-
-            ! Loop over p to get FATES copy of annsum_npp
-            nc = bounds%clump_index
-            do fp = 1, num_soilp
-
-               p = filter_soilp(fp)
-               c = patch%column(p)
-
-               pf = p - col%patchi(c)
-               s  = clm_fates%f2hmap(nc)%hsites(c)
-               annsum_npp(p) = clm_fates%fates(nc)%bc_out(s)%annsum_npp_pa(pf)
-
-               ! Initialize local column-level annsum_npp before averaging
-               annsum_npp_col_local(c) = 0._r8
-
-            end do  ! p loop
-
-            ! Calculate the column-level average
-            call p2c(bounds, num_soilc, filter_soilc, &
-                 annsum_npp(bounds%begp:bounds%endp), &
-                 annsum_npp_col_local(bounds%begc:bounds%endc))
-         else
-            call endrun(msg='ERROR: soil_decomp_method = MIMICSWieder2015 '// &
+      if (use_fates .and. (.not.use_lch4)) then
+         call endrun(msg='ERROR: soil_decomp_method = MIMICSWieder2015 '// &
               'will work with use_fates = .true. only if use_lch4 = .true. '// &
               errMsg(sourcefile, __LINE__))
-         end if lch4_if
-      end if fates_if
+      end if
 
+      nc = bounds%clump_index
+      
       ! calculate rates for all litter and som pools
       do fc = 1,num_soilc
          c = filter_soilc(fc)
 
-         if (use_fates) then
-            annsum_npp_col_scalar = max(0._r8, annsum_npp_col_local(c))
+         if(col%is_fates(c)) then
+            s  = clm_fates%f2hmap(nc)%hsites(c)
+            annsum_npp_col_scalar = max(0._r8, clm_fates%fates(nc)%bc_out(s)%annsum_npp_coll)
          else
             annsum_npp_col_scalar = max(0._r8, cnveg_carbonflux_inst%annsum_npp_col(c))
          end if

@@ -96,8 +96,9 @@ contains
 
   !-----------------------------------------------------------------------
   subroutine NStateUpdate1(num_soilc, filter_soilc, num_soilp, filter_soilp, &
-       cnveg_nitrogenflux_inst, cnveg_nitrogenstate_inst, soilbiogeochem_nitrogenflux_inst) 
-     use CNSharedParamsMod               , only : use_fun
+       cnveg_nitrogenflux_inst, cnveg_nitrogenstate_inst, soilbiogeochem_nitrogenflux_inst, clm_fates) 
+    use CNSharedParamsMod               , only : use_fun
+    use CLMFatesInterfaceMod            , only : hlm_fates_interface_type
     !
     ! !DESCRIPTION:
     ! On the radiation time step, update all the prognostic nitrogen state
@@ -111,6 +112,7 @@ contains
     type(cnveg_nitrogenflux_type)           , intent(inout) :: cnveg_nitrogenflux_inst
     type(cnveg_nitrogenstate_type)          , intent(inout) :: cnveg_nitrogenstate_inst
     type(soilbiogeochem_nitrogenflux_type)  , intent(inout) :: soilbiogeochem_nitrogenflux_inst
+    type(hlm_fates_interface_type)          , intent(inout) :: clm_fates
     !
     ! !LOCAL VARIABLES:
     integer :: c,p,j,l,g,k,i  ! indices
@@ -134,40 +136,60 @@ contains
 
       ! soilbiogeochemistry fluxes TODO - this should be moved elsewhere
       ! plant to litter fluxes -  phenology and dynamic landcover fluxes
-      do j = 1, nlevdecomp
-         do fc = 1,num_soilc
-            c = filter_soilc(fc)
-            !
-            ! State update without the matrix solution
-            !
-            if (.not. use_soil_matrixcn) then ! to be consistent with C
-               do i = i_litr_min, i_litr_max
-                  nf_soil%decomp_npools_sourcesink_col(c,j,i) = &
-                     nf_veg%phenology_n_to_litr_n_col(c,j,i) * dt
-               end do
 
-               ! NOTE(wjs, 2017-01-02) This used to be set to a non-zero value, but the
-               ! terms have been moved to CStateUpdateDynPatch. I think this is zeroed every
-               ! time step, but to be safe, I'm explicitly setting it to zero here.
-               nf_soil%decomp_npools_sourcesink_col(c,j,i_cwd) = 0._r8
+      do fc = 1,num_soilc
+         c = filter_soilc(fc)
 
-            !
-            ! For the matrix solution the actual state update comes after the matrix
-            ! multiply in SoilMatrix, but the matrix needs to be setup with
-            ! the equivalent of above. Those changes can be here or in the
-            ! native subroutines dealing with that field
-            !
-            else
-               ! Do the above to the matrix solution
-               do i = i_litr_min, i_litr_max
-               end do
-            end if
-         end do
+         ! If this is a fates column, then we ask fates for the
+         ! litter fluxes, the following routine simply copies
+         ! prepared litter c flux boundary conditions into
+         ! cf_soil%decomp_cpools_sourcesink_col
+
+         if( col%is_fates(c) ) then
+
+            call clm_fates%UpdateNLitterfluxes(bounds_clump,nf_soil,c)
+
+         else
+      
+            do j = 1, nlevdecomp
+
+               !
+               ! State update without the matrix solution
+               !
+               if (.not. use_soil_matrixcn) then ! to be consistent with C
+                  do i = i_litr_min, i_litr_max
+                     nf_soil%decomp_npools_sourcesink_col(c,j,i) = &
+                          nf_veg%phenology_n_to_litr_n_col(c,j,i) * dt
+                  end do
+
+                  ! NOTE(wjs, 2017-01-02) This used to be set to a non-zero value, but the
+                  ! terms have been moved to CStateUpdateDynPatch. I think this is zeroed every
+                  ! time step, but to be safe, I'm explicitly setting it to zero here.
+                  nf_soil%decomp_npools_sourcesink_col(c,j,i_cwd) = 0._r8
+
+                  !
+                  ! For the matrix solution the actual state update comes after the matrix
+                  ! multiply in SoilMatrix, but the matrix needs to be setup with
+                  ! the equivalent of above. Those changes can be here or in the
+                  ! native subroutines dealing with that field
+                  !
+               else
+                  ! Do the above to the matrix solution
+                  do i = i_litr_min, i_litr_max
+                  end do
+               end if
+            end do
+         end if
       end do
 
       do fp = 1,num_soilp
          p = filter_soilp(fp)
 
+         ! RGK - better yet, should we create a non-fates soilp filter?
+         !       in probably most cases, the soilp filter should be non-fates
+         !       anyway
+         if_notfates_patch: if( .not.patch%is_fates(p) ) then
+            
          ! phenology: transfer growth fluxes
 
          !
@@ -436,6 +458,7 @@ contains
             end if ! not use_matrixcn
          end if
 
+         end if if_notfates_patch
       end do
 
     end associate

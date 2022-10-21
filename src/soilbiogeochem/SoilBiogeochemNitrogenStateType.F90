@@ -121,7 +121,9 @@ contains
     allocate(this%smin_nh4_vr_col      (begc:endc,1:nlevdecomp_full)) ; this%smin_nh4_vr_col      (:,:) = nan
     allocate(this%smin_no3_col         (begc:endc))                   ; this%smin_no3_col         (:)   = nan
     allocate(this%smin_nh4_col         (begc:endc))                   ; this%smin_nh4_col         (:)   = nan
-    allocate(this%cwdn_col             (begc:endc))                   ; this%cwdn_col             (:)   = nan
+    if(.not.use_fates)then
+       allocate(this%cwdn_col             (begc:endc))                   ; this%cwdn_col             (:)   = nan
+    end if
     allocate(this%sminn_col            (begc:endc))                   ; this%sminn_col            (:)   = nan
     allocate(this%ntrunc_col           (begc:endc))                   ; this%ntrunc_col           (:)   = nan
     allocate(this%totlitn_col          (begc:endc))                   ; this%totlitn_col          (:)   = nan
@@ -418,7 +420,8 @@ contains
           this%totsomn_col(c)    = 0._r8
           this%totlitn_1m_col(c) = 0._r8
           this%totsomn_1m_col(c) = 0._r8
-          this%cwdn_col(c)       = 0._r8
+          
+          if ( .not. use_fates ) this%cwdn_col(c)       = 0._r8
 
        end if
     end do
@@ -709,7 +712,7 @@ contains
 
        this%sminn_col(i)       = value_column
        this%ntrunc_col(i)      = value_column
-       this%cwdn_col(i)        = value_column
+       if ( .not. use_fates ) this%cwdn_col(i)        = value_column
        if (use_nitrif_denitrif) then
           this%smin_no3_col(i) = value_column
           this%smin_nh4_col(i) = value_column
@@ -953,20 +956,22 @@ contains
    end do
    
    ! total cwdn
-   do fc = 1,num_allc
-      c = filter_allc(fc)
-      this%cwdn_col(c) = 0._r8
-   end do
-   do l = 1, ndecomp_pools
-      if ( decomp_cascade_con%is_cwd(l) ) then
-         do fc = 1,num_allc
-            c = filter_allc(fc)
-            this%cwdn_col(c) = this%cwdn_col(c) + &
-                 this%decomp_npools_col(c,l)
-         end do
-      end if
-   end do
-
+   if ( .not. use_fates ) then
+      do fc = 1,num_allc
+         c = filter_allc(fc)
+         this%cwdn_col(c) = 0._r8
+      end do
+      do l = 1, ndecomp_pools
+         if ( decomp_cascade_con%is_cwd(l) ) then
+            do fc = 1,num_allc
+               c = filter_allc(fc)
+               this%cwdn_col(c) = this%cwdn_col(c) + &
+                    this%decomp_npools_col(c,l)
+            end do
+         end if
+      end do
+   end if
+   
    ! total sminn
    do fc = 1,num_allc
       c = filter_allc(fc)

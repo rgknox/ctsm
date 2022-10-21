@@ -60,9 +60,9 @@ contains
     type(bounds_type), intent(in) :: bounds  
 
     call this%InitAllocate ( bounds )
-    if (use_cn) then
-       call this%InitHistory ( bounds )
-    end if
+
+    call this%InitHistory ( bounds )
+
     call this%InitCold ( bounds ) 
 
   end subroutine Init
@@ -132,31 +132,42 @@ contains
     begp = bounds%begp; endp= bounds%endp
     begc = bounds%begc; endc= bounds%endc
 
-    this%croot_prof_patch(begp:endp,:) = spval
-    call hist_addfld_decomp (fname='CROOT_PROF', units='1/m',  type2d='levdcmp', &
-         avgflag='A', long_name='profile for litter C and N inputs from coarse roots', &
-         ptr_patch=this%croot_prof_patch, default='inactive')
+    if (use_cn) then
+    
+       this%croot_prof_patch(begp:endp,:) = spval
+       call hist_addfld_decomp (fname='CROOT_PROF', units='1/m',  type2d='levdcmp', &
+            avgflag='A', long_name='profile for litter C and N inputs from coarse roots', &
+            ptr_patch=this%croot_prof_patch, default='inactive')
+       
+       this%froot_prof_patch(begp:endp,:) = spval
+       call hist_addfld_decomp (fname='FROOT_PROF', units='1/m',  type2d='levdcmp', &
+            avgflag='A', long_name='profile for litter C and N inputs from fine roots', &
+            ptr_patch=this%froot_prof_patch, default='inactive')
+       
+       this%leaf_prof_patch(begp:endp,:) = spval
+       call hist_addfld_decomp (fname='LEAF_PROF', units='1/m',  type2d='levdcmp', &
+            avgflag='A', long_name='profile for litter C and N inputs from leaves', &
+            ptr_patch=this%leaf_prof_patch, default='inactive')
+       
+       this%stem_prof_patch(begp:endp,:) = spval
+       call hist_addfld_decomp (fname='STEM_PROF', units='1/m',  type2d='levdcmp', &
+            avgflag='A', long_name='profile for litter C and N inputs from stems', &
+            ptr_patch=this%stem_prof_patch, default='inactive')
 
-    this%froot_prof_patch(begp:endp,:) = spval
-    call hist_addfld_decomp (fname='FROOT_PROF', units='1/m',  type2d='levdcmp', &
-         avgflag='A', long_name='profile for litter C and N inputs from fine roots', &
-         ptr_patch=this%froot_prof_patch, default='inactive')
-
-    this%leaf_prof_patch(begp:endp,:) = spval
-    call hist_addfld_decomp (fname='LEAF_PROF', units='1/m',  type2d='levdcmp', &
-         avgflag='A', long_name='profile for litter C and N inputs from leaves', &
-         ptr_patch=this%leaf_prof_patch, default='inactive')
-
-    this%stem_prof_patch(begp:endp,:) = spval
-    call hist_addfld_decomp (fname='STEM_PROF', units='1/m',  type2d='levdcmp', &
-         avgflag='A', long_name='profile for litter C and N inputs from stems', &
-         ptr_patch=this%stem_prof_patch, default='inactive')
-
+       if (.not. use_fun) then
+          this%fpg_col(begc:endc) = spval
+          call hist_addfld1d (fname='FPG', units='proportion', &
+               avgflag='A', long_name='fraction of potential gpp', &
+               ptr_col=this%fpg_col)
+       end if
+       
+    end if
+    
     this%nfixation_prof_col(begc:endc,:) = spval
     call hist_addfld_decomp (fname='NFIXATION_PROF', units='1/m',  type2d='levdcmp', &
          avgflag='A', long_name='profile for biological N fixation', &
          ptr_col=this%nfixation_prof_col, default='inactive')
-
+       
     this%ndep_prof_col(begc:endc,:) = spval
     call hist_addfld_decomp (fname='NDEP_PROF', units='1/m',  type2d='levdcmp', &
          avgflag='A', long_name='profile for atmospheric N  deposition', &
@@ -179,12 +190,7 @@ contains
             ptr_col=this%fpi_col)
     endif
    
-    if (.not. use_fun) then
-       this%fpg_col(begc:endc) = spval
-       call hist_addfld1d (fname='FPG', units='proportion', &
-            avgflag='A', long_name='fraction of potential gpp', &
-            ptr_col=this%fpg_col)
-    end if
+    
 
     if (nlevdecomp > 1) then
        vr_suffix = "_vr"

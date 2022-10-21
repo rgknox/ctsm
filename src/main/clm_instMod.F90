@@ -371,7 +371,7 @@ contains
 
     call drydepvel_inst%Init(bounds)
 
-    if (decomp_method /= no_soil_decomp) then
+    decomp_method: if (decomp_method /= no_soil_decomp) then
 
        ! Initialize soilbiogeochem_state_inst
 
@@ -423,7 +423,7 @@ contains
        call SoilBiogeochemPrecisionControlInit( soilbiogeochem_carbonstate_inst, c13_soilbiogeochem_carbonstate_inst, &
                                                 c14_soilbiogeochem_carbonstate_inst, soilbiogeochem_nitrogenstate_inst)
 
-    end if ! end of if use_cn 
+    end if decomp_method
 
     ! Note - always call Init for bgc_vegetation_inst: some pieces need to be initialized always
     call bgc_vegetation_inst%Init(bounds, nlfilename, GetBalanceCheckSkipSteps(), params_ncid )

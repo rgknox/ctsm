@@ -523,20 +523,21 @@ contains
           end if
        end if
 
-       if ( .not. use_fates ) then
-          if (lun%itype(l) == istsoil .or. lun%itype(l) == istcrop) then
+       
+       if (lun%itype(l) == istsoil .or. lun%itype(l) == istcrop) then
+          if ( .not. use_fates ) then
              if (present(c12_soilbiogeochem_carbonstate_inst)) then
                 this%cwdc_col(c)    = c12_soilbiogeochem_carbonstate_inst%cwdc_col(c) * ratio
              else
                 this%cwdc_col(c)    = 0._r8
              end if
-             this%ctrunc_col(c)     = 0._r8
-             this%totmicc_col(c)    = 0._r8
-             this%totlitc_col(c)    = 0._r8
-             this%totsomc_col(c)    = 0._r8
-             this%totlitc_1m_col(c) = 0._r8
-             this%totsomc_1m_col(c) = 0._r8
           end if
+          this%ctrunc_col(c)     = 0._r8
+          this%totmicc_col(c)    = 0._r8
+          this%totlitc_col(c)    = 0._r8
+          this%totsomc_col(c)    = 0._r8
+          this%totlitc_1m_col(c) = 0._r8
+          this%totsomc_1m_col(c) = 0._r8
        end if
     end do
 

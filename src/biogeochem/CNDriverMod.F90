@@ -308,7 +308,7 @@ contains
         call t_stopf('CNFLivFixation')
     else
        call t_startf('CNFixation')
-       call CNNFixation( num_soilc, filter_soilc, &
+       call CNNFixation( bounds, num_soilc, filter_soilc, &
             cnveg_carbonflux_inst, soilbiogeochem_nitrogenflux_inst)
        call t_stopf('CNFixation')
     end if
@@ -627,21 +627,21 @@ contains
     ! Update all prognostic carbon state variables (except for gap-phase mortality and fire fluxes)
     call CStateUpdate1( num_soilc, filter_soilc, num_soilp, filter_soilp, &
          crop_inst, cnveg_carbonflux_inst, cnveg_carbonstate_inst, &
-         soilbiogeochem_carbonflux_inst, dribble_crophrv_xsmrpool_2atm)
+         soilbiogeochem_carbonflux_inst, dribble_crophrv_xsmrpool_2atm, clm_fates)
     if ( use_c13 ) then
        call CStateUpdate1(num_soilc, filter_soilc, num_soilp, filter_soilp, &
             crop_inst, c13_cnveg_carbonflux_inst, c13_cnveg_carbonstate_inst, &
-            c13_soilbiogeochem_carbonflux_inst, dribble_crophrv_xsmrpool_2atm)
+            c13_soilbiogeochem_carbonflux_inst, dribble_crophrv_xsmrpool_2atm, clm_fates)
     end if
     if ( use_c14 ) then
        call CStateUpdate1(num_soilc, filter_soilc, num_soilp, filter_soilp, &
             crop_inst, c14_cnveg_carbonflux_inst, c14_cnveg_carbonstate_inst, &
-            c14_soilbiogeochem_carbonflux_inst, dribble_crophrv_xsmrpool_2atm)
+            c14_soilbiogeochem_carbonflux_inst, dribble_crophrv_xsmrpool_2atm, clm_fates)
     end if
 
     ! Update all prognostic nitrogen state variables (except for gap-phase mortality and fire fluxes)
     call NStateUpdate1(num_soilc, filter_soilc, num_soilp, filter_soilp, &
-         cnveg_nitrogenflux_inst, cnveg_nitrogenstate_inst, soilbiogeochem_nitrogenflux_inst)
+         cnveg_nitrogenflux_inst, cnveg_nitrogenstate_inst, soilbiogeochem_nitrogenflux_inst, clm_fates)
 
     call t_stopf('CNUpdate1')
 

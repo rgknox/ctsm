@@ -191,7 +191,7 @@ contains
   end subroutine CNFreeLivingFixation
 
   !-----------------------------------------------------------------------
-  subroutine CNNFixation(num_soilc, filter_soilc, &
+  subroutine CNNFixation(bounds_clump,num_soilc, filter_soilc, &
        cnveg_carbonflux_inst, soilbiogeochem_nitrogenflux_inst)
     !
     ! !DESCRIPTION:
@@ -213,6 +213,8 @@ contains
     !
     ! !LOCAL VARIABLES:
     integer  :: c,fc                  ! indices
+    integer  :: ic                    ! current clump index
+    real(r8) :: annsum_npp            ! local annual npp sum gC/m2/yr
     real(r8) :: t                     ! temporary
     real(r8) :: dayspyr               ! days per year
     !-----------------------------------------------------------------------
@@ -224,6 +226,7 @@ contains
          nfix_to_sminn  => soilbiogeochem_nitrogenflux_inst%nfix_to_sminn_col & ! Output: [real(r8) (:)]  symbiotic/asymbiotic N fixation to soil mineral N (gN/m2/s)
          )
 
+      nc = bounds%clump_index
       dayspyr = get_curr_days_per_year()
 
       if ( nfix_timeconst > 0._r8 .and. nfix_timeconst < 500._r8 ) then
@@ -245,7 +248,14 @@ contains
          do fc = 1,num_soilc
             c = filter_soilc(fc)
 
-            t = (1.8_r8 * (1._r8 - exp(-0.003_r8 * cannsum_npp(c))))/(secspday * dayspyr)
+            if(col%is_fates(c)) then
+               s  = clm_fates%f2hmap(nc)%hsites(c)
+               annsum_npp = clm_fates%fates(nc)%bc_out(s)%annsum_npp_col
+            else
+               annsum_npp = cannsum_npp(c)
+            end if
+               
+            t = (1.8_r8 * (1._r8 - exp(-0.003_r8 * annsum_npp)))/(secspday * dayspyr)
             nfix_to_sminn(c) = max(0._r8,t)
          end do
       endif

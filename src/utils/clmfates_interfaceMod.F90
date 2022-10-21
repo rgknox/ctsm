@@ -80,6 +80,9 @@ module CLMFatesInterfaceMod
    use SolarAbsorbedType , only : solarabs_type
    use SoilBiogeochemCarbonFluxType, only :  soilbiogeochem_carbonflux_type
    use SoilBiogeochemCarbonStateType, only : soilbiogeochem_carbonstate_type
+   use SoilBiogeochemNitrogenFluxType, only :  soilbiogeochem_nitrogenflux_type
+   use SoilBiogeochemNitrogenStateType, only : soilbiogeochem_nitrogenstate_type
+   
    use FrictionVelocityMod  , only : frictionvel_type
    use clm_time_manager  , only : is_restart, is_first_restart_step
    use ncdio_pio         , only : file_desc_t, ncd_int, ncd_double
@@ -224,6 +227,8 @@ module CLMFatesInterfaceMod
       procedure, public  :: wrap_hydraulics_drive
       procedure, public  :: WrapUpdateFatesRmean
       procedure, public  :: wrap_WoodProducts
+      procedure, public  :: UpdateCLitterFluxes
+      procedure, public  :: UpdateNLitterFluxes
       
    end type hlm_fates_interface_type
 
@@ -1039,37 +1044,37 @@ module CLMFatesInterfaceMod
       ! of the HLMs API.  (column, depth, and litter fractions)
       ! ---------------------------------------------------------------------------------
 
-      if ( decomp_method /= no_soil_decomp )then
-         do s = 1, this%fates(nc)%nsites
-            c = this%f2hmap(nc)%fcolumn(s)
-
-            soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lab_c_col(c,1:nlevdecomp) = 0.0_r8
-            soilbiogeochem_carbonflux_inst%FATES_c_to_litr_cel_c_col(c,1:nlevdecomp) = 0.0_r8
-            soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lig_c_col(c,1:nlevdecomp) = 0.0_r8
-
-            nld_si = this%fates(nc)%bc_in(s)%nlevdecomp
-
-            soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lab_c_col(c,1:nld_si) = &
-                 this%fates(nc)%bc_out(s)%litt_flux_lab_c_si(1:nld_si)
-
-            soilbiogeochem_carbonflux_inst%FATES_c_to_litr_cel_c_col(c,1:nld_si) = &
-                 this%fates(nc)%bc_out(s)%litt_flux_cel_c_si(1:nld_si)
-
-            soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lig_c_col(c,1:nld_si) = &
-                 this%fates(nc)%bc_out(s)%litt_flux_lig_c_si(1:nld_si)
-
-            ! Copy last 3 variables to an array of litter pools for use in do loops
-            ! and repeat copy in soilbiogeochem/SoilBiogeochemCarbonFluxType.F90.
-            ! Keep the three originals to avoid backwards compatibility issues with
-            ! restart files.
-            soilbiogeochem_carbonflux_inst%FATES_c_to_litr_c_col(c,1:nld_si,1) = &
-               soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lab_c_col(c,1:nld_si)
-            soilbiogeochem_carbonflux_inst%FATES_c_to_litr_c_col(c,1:nld_si,2) = &
-               soilbiogeochem_carbonflux_inst%FATES_c_to_litr_cel_c_col(c,1:nld_si)
-            soilbiogeochem_carbonflux_inst%FATES_c_to_litr_c_col(c,1:nld_si,3) = &
-               soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lig_c_col(c,1:nld_si)
-
-         end do
+      !if ( decomp_method /= no_soil_decomp )then
+      !   do s = 1, this%fates(nc)%nsites
+      !      c = this%f2hmap(nc)%fcolumn(s)
+      !
+      !     soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lab_c_col(c,1:nlevdecomp) = 0.0_r8
+      !      soilbiogeochem_carbonflux_inst%FATES_c_to_litr_cel_c_col(c,1:nlevdecomp) = 0.0_r8
+      !      soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lig_c_col(c,1:nlevdecomp) = 0.0_r8
+      !
+      !      nld_si = this%fates(nc)%bc_in(s)%nlevdecomp
+      !
+      !      soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lab_c_col(c,1:nld_si) = &
+      !           this%fates(nc)%bc_out(s)%litt_flux_lab_c_si(1:nld_si)
+      !
+      !     soilbiogeochem_carbonflux_inst%FATES_c_to_litr_cel_c_col(c,1:nld_si) = &
+      !          this%fates(nc)%bc_out(s)%litt_flux_cel_c_si(1:nld_si)
+      !
+      !      soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lig_c_col(c,1:nld_si) = &
+      !           this%fates(nc)%bc_out(s)%litt_flux_lig_c_si(1:nld_si)
+      !
+      !      ! Copy last 3 variables to an array of litter pools for use in do loops
+      !      ! and repeat copy in soilbiogeochem/SoilBiogeochemCarbonFluxType.F90.
+      !      ! Keep the three originals to avoid backwards compatibility issues with
+      !      ! restart files.
+      !      soilbiogeochem_carbonflux_inst%FATES_c_to_litr_c_col(c,1:nld_si,1) = &
+      !         soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lab_c_col(c,1:nld_si)
+      !      soilbiogeochem_carbonflux_inst%FATES_c_to_litr_c_col(c,1:nld_si,2) = &
+      !         soilbiogeochem_carbonflux_inst%FATES_c_to_litr_cel_c_col(c,1:nld_si)
+      !      soilbiogeochem_carbonflux_inst%FATES_c_to_litr_c_col(c,1:nld_si,3) = &
+      !         soilbiogeochem_carbonflux_inst%FATES_c_to_litr_lig_c_col(c,1:nld_si)
+      !
+      !   end do
       end if
 
 
@@ -1103,8 +1108,91 @@ module CLMFatesInterfaceMod
       return
    end subroutine dynamics_driv
 
-   ! ------------------------------------------------------------------------------------
+   ! ===============================================================================
+   
+   subroutine UpdateCLitterFluxes(this,bounds_clump,soilbiogeochem_carbonflux_inst,c)
 
+     implicit none
+     class(hlm_fates_interface_type), intent(inout)       :: this
+     type(bounds_type)              , intent(in)          :: bounds_clump
+     type(soilbiogeochem_carbonflux_type) , intent(inout) :: soilbiogeochem_carbonflux_inst
+     integer                        , intent(in)          :: c
+
+     integer  :: s                        ! site index
+     integer  :: nc                       ! clump index
+     real(r8) :: dtime
+     
+
+     dtime = get_step_size_real()
+     nc = bounds_clump%clump_index
+     s = this%f2hmap(nc)%hsites(c)
+
+     associate(cf_soil => soilbiogeochem_carbonflux_inst)
+     
+       cf_soil%decomp_cpools_sourcesink(c,1:nlevdecomp,i_met_lit) = &
+            cf_soil%decomp_cpools_sourcesink(c,1:nlevdecomp,i_met_lit) + &
+            this%fates(nc)%bc_out(s)%litt_flux_lab_c_si(1:nlevdecomp) * dtime
+       cf_soil%decomp_cpools_sourcesink(c,1:nlevdecomp,i_cel_lit) = &
+            cf_soil%decomp_cpools_sourcesink(c,1:nlevdecomp,i_cel_lit) + &
+            this%fates(nc)%bc_out(s)%litt_flux_cel_c_si(1:nlevdecomp)* dtime
+       cf_soil%decomp_cpools_sourcesink(c,1:nlevdecomp,i_lig_lit) = &
+            cf_soil%decomp_cpools_sourcesink(c,1:nlevdecomp,i_lig_lit) + &
+            this%fates(nc)%bc_out(s)%litt_flux_lig_c_si(1:nlevdecomp) * dtime
+       
+       ! This is a diagnostic for carbon accounting (NOT IN CLM, ONLY ELM)
+       !col_cf%litfall(c) = &
+       !     sum(this%fates(nc)%bc_out(s)%litt_flux_lab_c_si(1:nlevdecomp) * &
+       !         this%fates(nc)%bc_in(s)%dz_decomp_sisl(1:nlevdecomp)) + &
+       !     sum(this%fates(nc)%bc_out(s)%litt_flux_cel_c_si(1:nlevdecomp) * &
+       !         this%fates(nc)%bc_in(s)%dz_decomp_sisl(1:nlevdecomp)) + &
+       !     sum(this%fates(nc)%bc_out(s)%litt_flux_lig_c_si(1:nlevdecomp) * ^
+       !         this%fates(nc)%bc_in(s)%dz_decomp_sisl(1:nlevdecomp))
+       
+     end associate
+     
+     return
+   end subroutine UpdateCLitterFluxes
+
+   ! ==================================================================================
+   
+   subroutine UpdateNLitterFluxes(this,bounds_clump,soilbiogeochem_nitrogenflux_inst,c)
+
+     implicit none
+     class(hlm_fates_interface_type), intent(inout)         :: this
+     type(bounds_type)              , intent(in)            :: bounds_clump
+     type(soilbiogeochem_nitrogenflux_type) , intent(inout) :: soilbiogeochem_nitrogenflux_inst
+     integer                        , intent(in)            :: c
+     
+     ! !LOCAL VARIABLES:
+     integer  :: s                        ! site index
+     integer  :: nc                       ! clump index
+     real(r8) :: dtime
+     
+
+     dtime = get_step_size_real()
+     nc = bounds_clump%clump_index
+     s = this%f2hmap(nc)%hsites(c)
+
+     associate(cn_soil => soilbiogeochem_nitrogenflux_inst)
+     
+       cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_met_lit) = &
+            cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_met_lit) + &
+            this%fates(nc)%bc_out(s)%litt_flux_lab_c_si(1:nlevdecomp) * dtime
+       cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_cel_lit) = &
+            cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_cel_lit) + &
+            this%fates(nc)%bc_out(s)%litt_flux_cel_c_si(1:nlevdecomp)* dtime
+       cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_lig_lit) = &
+            cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_lig_lit) + &
+            this%fates(nc)%bc_out(s)%litt_flux_lig_c_si(1:nlevdecomp) * dtime
+       
+       
+     end associate
+     
+     return
+   end subroutine UpdateNLitterFluxes
+   
+   ! ------------------------------------------------------------------------------------
+   
    subroutine wrap_update_hlmfates_dyn(this, nc, bounds_clump,      &
         waterdiagnosticbulk_inst, canopystate_inst, &
         soilbiogeochem_carbonflux_inst, is_initing_from_restart)

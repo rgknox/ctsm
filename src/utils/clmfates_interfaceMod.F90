@@ -1173,16 +1173,16 @@ module CLMFatesInterfaceMod
      nc = bounds_clump%clump_index
      s = this%f2hmap(nc)%hsites(c)
 
-     associate(cn_soil => soilbiogeochem_nitrogenflux_inst)
+     associate(nf_soil => soilbiogeochem_nitrogenflux_inst)
      
-       cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_met_lit) = &
-            cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_met_lit) + &
+       nf_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_met_lit) = &
+            nf_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_met_lit) + &
             this%fates(nc)%bc_out(s)%litt_flux_lab_c_si(1:nlevdecomp) * dtime
-       cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_cel_lit) = &
-            cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_cel_lit) + &
+       nf_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_cel_lit) = &
+            nf_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_cel_lit) + &
             this%fates(nc)%bc_out(s)%litt_flux_cel_c_si(1:nlevdecomp)* dtime
-       cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_lig_lit) = &
-            cn_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_lig_lit) + &
+       nf_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_lig_lit) = &
+            nf_soil%decomp_npools_sourcesink(c,1:nlevdecomp,i_lig_lit) + &
             this%fates(nc)%bc_out(s)%litt_flux_lig_c_si(1:nlevdecomp) * dtime
        
        

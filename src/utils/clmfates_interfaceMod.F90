@@ -240,9 +240,59 @@ module CLMFatesInterfaceMod
         __FILE__
 
    public  :: CLMFatesGlobals
+   public  :: CrossRefHistoryFields
 
+   
  contains
 
+   subroutine CrossRefHistoryFields
+
+     ! This routine only needs to be called on the masterproc.
+     ! Here we cross reference the CLM history master
+     ! list and make sure that all fields that start
+     ! with fates have been allocated. If it has
+     ! not, then we give a more constructive error
+     ! message than what is possible in PIO. The user
+     ! most likely needs to increase the history density
+     ! level
+     
+     use histFileMod, only: masterlist
+     use histFileMod, only: nfmaster
+
+     logical :: found ! if true, than the history field is either
+                      ! not part of the fates set, or was found in
+                      ! the fates set
+    
+     
+     do nf = 1,nfmaster
+        if(scan(masterlist(nf)%field%name,'FATES_'))then
+           found = .false.
+           do_fates_hist: do nh = 1,fates_hist%num_history_vars
+              if(trim(fates_hist%hvars(ivar)%vname) == &
+                   trim(masterlist(nf)%fieldname)) then
+                 found=.true.
+                 exit do_fates_hist
+              end if
+           end do do_fates_hist
+        
+           if(.not.found)then
+              write(iulog,*) 'the history field: ',masterlist(nf)%field%name
+              write(iulog,*) 'was identified as a FATES history variable'
+              write(iulog,*) 'but was not found in the list of fates_hist%hvars'
+              write(iulog,*) 'Very often, this is because this history variable'
+              write(iulog,*) 'was specified in the user namelist, but the user'
+              write(iulog,*) 'also specified a FATES history output density level'
+              write(iulog,*) 'that does not contain that variable in its valid set.'
+              write(iulog,*) 'You may have to increase the namelist setting: fates_hist_dens_level'
+              write(iulog,*) 'fates_hist_dens_level: ',hlm_hist_dens_level
+              call endrun(msg=errMsg(sourcefile, __LINE__))
+           end if
+        end if
+        
+     end do
+     
+   end subroutine CrossRefHistoryFields
+   
 
    subroutine CLMFatesGlobals()
 

@@ -136,7 +136,7 @@ module CLMFatesInterfaceMod
    use EDInitMod             , only : init_patches
    use EDInitMod             , only : set_site_properties
    use EDPftVarcon           , only : EDpftvarcon_inst
-   use EDSurfaceRadiationMod , only : ED_SunShadeFracs, ED_Norman_Radiation
+   use FatesRadiationDriveMod, only : FatesSunShadeFracs, FatesNormalizedCanopyRadiation
    use EDBtranMod            , only : btran_ed, &
                                       get_active_suction_layers
    use EDCanopyStructureMod  , only : canopy_summarization, update_hlm_dynamics
@@ -1822,12 +1822,34 @@ module CLMFatesInterfaceMod
 
            end do
 
+
+
            ! ------------------------------------------------------------------------
            ! Update diagnostics of FATES ecosystem structure used in HLM.
            ! ------------------------------------------------------------------------
            call this%wrap_update_hlmfates_dyn(nc,bounds_clump, &
                 waterdiagnosticbulk_inst,canopystate_inst, &
                 soilbiogeochem_carbonflux_inst, .false.)
+
+           do s = 1,this%fates(nc)%nsites
+              c = this%f2hmap(nc)%fcolumn(s)
+
+              ! Because the canopy radiation solution (normalized)
+              ! is called at the end of the driver sequence for each
+              ! timestep, when the first timestep is initiated
+              ! on a cold-start, there will be no solution prepared.
+              ! Even if it is day-time, we simply elect to set the
+              ! zenith flag to night-time, and give some arbitrary
+              ! starter values for snow and soil albedo. This is
+              ! only 1 timestep, 30 minutes.
+              
+              this%fates(nc)%bc_in(s)%filter_vegzen_pa(:) = .false.
+              this%fates(nc)%bc_in(s)%coszen_pa(:) = 0.0_r8
+              this%fates(nc)%bc_in(s)%albgr_dif_rb(:) = 0.3_r8
+              this%fates(nc)%bc_in(s)%albgr_dir_rb(:) = 0.3_r8
+              this%fates(nc)%bc_in(s)%fcansno_pa(:)   = 0._r8
+           end do
+
 
            ! ------------------------------------------------------------------------
            ! Update history IO fields that depend on ecosystem dynamics
@@ -1917,7 +1939,7 @@ module CLMFatesInterfaceMod
         ! as well as total patch sun/shade fraction output boundary condition
         ! -------------------------------------------------------------------------------
 
-        call ED_SunShadeFracs(this%fates(nc)%nsites, &
+        call FatesSunShadeFracs(this%fates(nc)%nsites, &
              this%fates(nc)%sites,  &
              this%fates(nc)%bc_in,  &
              this%fates(nc)%bc_out)
@@ -2431,7 +2453,7 @@ module CLMFatesInterfaceMod
        end do
     end do
 
-    call ED_Norman_Radiation(this%fates(nc)%nsites,  &
+    call FatesNormalizedCanopyRadiation(this%fates(nc)%nsites,  &
          this%fates(nc)%sites, &
          this%fates(nc)%bc_in,  &
          this%fates(nc)%bc_out)
@@ -2510,12 +2532,23 @@ module CLMFatesInterfaceMod
 
       dtime = get_step_size_real()
 
-      ! Update history variables that track these variables
-      call fates_hist%update_history_hifrq(nc, &
-            this%fates(nc)%nsites,  &
-            this%fates(nc)%sites,   &
-            this%fates(nc)%bc_in,   &
-            dtime)
+      ! Update history variables that track these high frequency variables
+      call fates_hist%update_history_hifrq_simple(nc, &
+           this%fates(nc)%nsites,  &
+           this%fates(nc)%sites,   &
+           this%fates(nc)%bc_in,   &
+           this%fates(nc)%bc_out,  & 
+           dtime)
+
+      ! Update history variables that track these multi-dimensioned
+      ! high frequency variables
+      call fates_hist%update_history_hifrq_multi(nc, &
+           this%fates(nc)%nsites,  &
+           this%fates(nc)%sites,   &
+           this%fates(nc)%bc_in,   &
+           this%fates(nc)%bc_out,  & 
+           dtime)
+
 
     end associate
 

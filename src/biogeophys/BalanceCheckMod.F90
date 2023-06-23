@@ -946,6 +946,17 @@ contains
                write(iulog,*)'forc_solai(2) = ',forc_solai(indexg,2)
                write(iulog,*)'forc_tot      = ',forc_solad(indexg,1)+forc_solad(indexg,2) &
                   +forc_solai(indexg,1)+forc_solai(indexg,2)
+               write(iulog,*)'abs+refl tot  = ',fsa(indexp)+fsr(indexp)
+               write(iulog,*)'elai esai = '      ,elai(indexp),   esai(indexp)
+               write(iulog,*)'cosz = ',surfalb_inst%coszen_col(patch%column(indexp))
+               write(iulog,*)'is_fates = ',patch%is_fates(indexp)
+               write(iulog,*)'ftdd: ',surfalb_inst%ftdd_patch(indexp,:)
+               write(iulog,*)'ftid: ',surfalb_inst%ftid_patch(indexp,:)
+               write(iulog,*)'ftii: ',surfalb_inst%ftii_patch(indexp,:)
+               write(iulog,*)'fabi: ',surfalb_inst%fabi_patch(indexp,:)
+               write(iulog,*)'fabd: ',surfalb_inst%fabd_patch(indexp,:)
+               write(iulog,*)'albd: ',surfalb_inst%albd_patch(indexp,:)
+               write(iulog,*)'albi: ',surfalb_inst%albi_patch(indexp,:)
                write(iulog,*)'CTSM is stopping'
                call endrun(subgrid_index=indexp, subgrid_level=subgrid_level_patch, msg=errmsg(sourcefile, __LINE__))
            end if

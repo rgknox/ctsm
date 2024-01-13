@@ -705,16 +705,18 @@ contains
        ! bugs.
        allocate(downreg_patch(bounds_clump%begp:bounds_clump%endp))
        allocate(leafn_patch(bounds_clump%begp:bounds_clump%endp))
-       downreg_patch = bgc_vegetation_inst%get_downreg_patch(bounds_clump)
-       leafn_patch = bgc_vegetation_inst%get_leafn_patch(bounds_clump)
-
        allocate(froot_carbon(bounds_clump%begp:bounds_clump%endp))
        allocate(croot_carbon(bounds_clump%begp:bounds_clump%endp))
-       froot_carbon = bgc_vegetation_inst%get_froot_carbon_patch( &
-            bounds_clump, canopystate_inst%tlai_patch(bounds_clump%begp:bounds_clump%endp))
-       croot_carbon = bgc_vegetation_inst%get_croot_carbon_patch( &
-            bounds_clump, canopystate_inst%tlai_patch(bounds_clump%begp:bounds_clump%endp))
 
+       if(.not.use_fates)then
+          downreg_patch = bgc_vegetation_inst%get_downreg_patch(bounds_clump)
+          leafn_patch = bgc_vegetation_inst%get_leafn_patch(bounds_clump)
+          froot_carbon = bgc_vegetation_inst%get_froot_carbon_patch( &
+               bounds_clump, canopystate_inst%tlai_patch(bounds_clump%begp:bounds_clump%endp))
+          croot_carbon = bgc_vegetation_inst%get_croot_carbon_patch( &
+               bounds_clump, canopystate_inst%tlai_patch(bounds_clump%begp:bounds_clump%endp))
+       end if
+       
        call CanopyFluxes(bounds_clump,                                                      &
             filter(nc)%num_exposedvegp, filter(nc)%exposedvegp,                             &
             clm_fates,nc,                                                                   &

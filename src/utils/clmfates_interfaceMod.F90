@@ -2012,6 +2012,9 @@ module CLMFatesInterfaceMod
                  this%fates(nc)%bc_in(s)%hksat_sisl(1:nlevsoil) = &
                        soilstate_inst%hksat_col(c,1:nlevsoil)
 
+                 ! Used to initialize a new patch's interstitial co2 memory
+                 this%fates(nc)%bc_in(s)%cair_pa(:) = atm2lnd_inst%forc_pco2_gr(g)
+                 
                  do j = 1, nlevsoil
                     vol_ice = min(soilstate_inst%watsat_col(c,j), &
                           waterstatebulk_inst%h2osoi_ice_col(c,j)/(col%dz(c,j)*denice))

@@ -1994,6 +1994,7 @@ module CLMFatesInterfaceMod
 
               do s = 1,this%fates(nc)%nsites
                  c = this%f2hmap(nc)%fcolumn(s)
+                 g = col%gridcell(c)
 
                  nlevsoil = this%fates(nc)%bc_in(s)%nlevsoil
 

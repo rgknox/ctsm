@@ -499,8 +499,6 @@ contains
          avgflag='A', long_name='canopy vapor pressure deficit', &
          ptr_patch=this%vpd_can_patch, set_spec=spval, default='active')
 
-
-
     this%lnca_patch(begp:endp) = spval
     call hist_addfld1d (fname='LNC', units='gN leaf/m^2', &
          avgflag='A', long_name='leaf N concentration', &
@@ -1119,9 +1117,18 @@ contains
          units='kPa', &                                             
          interpinic_flag='interp', readvar=readvar, data=this%vpd_can_patch)
 
-
-
-  end subroutine Restart
+   if(use_fates)then
+      call restartvar(ncid=ncid, flag=flag, varname='RS_SUN', xtype=ncd_double,  &
+           dim1name='pft', long_name='stomatal conductance (sunlit)', &
+           units='s/m', &                                             
+           interpinic_flag='interp', readvar=readvar, data=this%rssun_patch)
+      call restartvar(ncid=ncid, flag=flag, varname='RS_SHA', xtype=ncd_double,  &
+           dim1name='pft', long_name='stomatal conductance (shaded)', &
+           units='s/m', &                                             
+           interpinic_flag='interp', readvar=readvar, data=this%rssha_patch)
+   end if
+  
+ end subroutine Restart
 
   !------------------------------------------------------------------------------
   subroutine TimeStepInit (this, bounds)

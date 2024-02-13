@@ -423,8 +423,9 @@ contains
     real(r8) :: uuc(bounds%begp:bounds%endp)             ! undercanopy windspeed
     real(r8) :: carea_stem                               ! cross-sectional area of stem
     real(r8) :: dlrad_leaf                               ! Downward longwave radition from leaf
-    real(r8) :: snocan_baseline(bounds%begp:bounds%endp)  ! baseline of snocan for use in truncate_small_values
-
+    real(r8) :: snocan_baseline(bounds%begp:bounds%endp) ! baseline of snocan for use in truncate_small_values
+    integer  :: n_iter_fates                             ! iteration loop counter if using weak fates coupling
+    
     ! Indices for raw and rah
     integer, parameter :: above_canopy = 1         ! Above canopy
     integer, parameter :: below_canopy = 2         ! Below canopy
@@ -437,6 +438,15 @@ contains
     real(r8), parameter :: k_internal = 0.0_r8         !self-absorbtion of leaf/stem longwave
     real(r8), parameter :: min_stem_diameter = 0.05_r8 !minimum stem diameter for which to calculate stem interactions
 
+    
+
+    ! FATES variable coupling strength. Instead of calling fates photosynthesis/stomatal resistance
+    ! calculations on every iteration of the energy balance solve, we can have a variable
+    ! strength solution, where this step is called outside the main loop. The strength
+    ! of the coupling tightness is therefore how many times we iterate the outer loop
+    integer, parameter :: max_iter_fates = 1
+    logical, parameter :: use_fates_vari_coupling = .true.
+    
     integer :: dummy_to_make_pgi_happy
     !------------------------------------------------------------------------------
 
@@ -1012,8 +1022,10 @@ bioms:   do f = 1, fn
       fnorig = fn
       fporig(1:fn) = filterp(1:fn)
 
+      n_iter_fates = 0  ! if using fates and variable coupling tightness,
+                        ! initialize the iterator to 0
+      
       ! Begin stability iteration
-
       call t_startf('can_iter')
       ITERATION : do while (itlef <= itmax_canopy_fluxes .and. fn > 0)
 
@@ -1025,7 +1037,7 @@ bioms:   do f = 1, fn
               obu(begp:endp), itlef+1, ur(begp:endp), um(begp:endp), ustar(begp:endp), &
               temp1(begp:endp), temp2(begp:endp), temp12m(begp:endp), temp22m(begp:endp), fm(begp:endp))
 
-         do f = 1, fn
+         ploop_inner1: do f = 1, fn
             p = filterp(f)
             c = patch%column(p)
             g = patch%gridcell(p)
@@ -1109,15 +1121,17 @@ bioms:   do f = 1, fn
             raw2(p)  = raw(p,below_canopy)
             vpd(p)  = max((svpts(p) - eah(p)), 50._r8) * 0.001_r8
 
-         end do
+         end do ploop_inner1
 
-         if ( use_fates ) then      
+         if ( use_fates ) then
             
-            call clm_fates%wrap_photosynthesis(nc, bounds, fn, filterp(1:fn), &
-                 svpts(begp:endp), eah(begp:endp), o2(begp:endp), &
-                 co2(begp:endp), rb(begp:endp), dayl_factor(begp:endp), &
-                 atm2lnd_inst, temperature_inst, canopystate_inst, photosyns_inst)
-
+            if(.not.use_fates_vari_coupling) then
+               call clm_fates%wrap_photosynthesis(nc, bounds, fn, filterp(1:fn), &
+                    svpts(begp:endp), eah(begp:endp), o2(begp:endp), &
+                    co2(begp:endp), rb(begp:endp), dayl_factor(begp:endp), &
+                    atm2lnd_inst, temperature_inst, canopystate_inst, photosyns_inst)
+            end if
+               
          else ! not use_fates
 
             if ( use_hydrstress ) then
@@ -1158,7 +1172,7 @@ bioms:   do f = 1, fn
 
          end if ! end of if use_fates
 
-         do f = 1, fn
+         ploop_inner2: do f = 1, fn
             p = filterp(f)
             c = patch%column(p)
             g = patch%gridcell(p)
@@ -1419,7 +1433,7 @@ bioms:   do f = 1, fn
             if (nmozsgn(p) >= 4) obu(p) = zldis(p)/(-0.01_r8)
             obuold(p) = obu(p)
 
-         end do   ! end of filtered patch loop
+         end do ploop_inner2 
 
          ! Test for convergence
 
@@ -1442,6 +1456,47 @@ bioms:   do f = 1, fn
                end if
             end do
          end if
+
+         ! For FATES patches: if we have come to a solution
+         ! we now update the stomatal resistance based on that
+         ! converged solution (Tveg, etc) and then go back
+         ! to the top of the loop
+         ! -----------------------------------------------------------------------
+         if(use_fates .and. use_fates_vari_coupling) then
+            if (fn==0 .or. itlef > itmax_canopy_fluxes) then
+
+               ! We update conductance and re-run the convergence
+               ! Only if we have not hit our fates iteration counter
+               ! If only 1 convergence iteration was performed since
+               ! the last time we updated stomatal conductance, then
+               ! there is no need for this step, either.
+               ! Always make sure that at least one photosynthesis call
+               ! is made
+               
+               if((n_iter_fates < max_iter_fates .and. itlef>1) .or. n_iter_fates==0 ) then
+                  
+                  ! Update the outer loop counter
+                  n_iter_fates=n_iter_fates+1
+                  
+                  ! Reset the inner iteration counter
+                  itlef = 0
+                  
+                  ! Reset the list of patches to balance
+                  fn = num_exposedvegp
+                  filterp(1:fn) = filter_exposedvegp(1:fn)
+                  
+                  ! Update stomatal resistances
+                  ! rssun(p), rssha(p)
+                  call clm_fates%wrap_photosynthesis(nc, bounds, fn, filterp(1:fn), &
+                       svpts(begp:endp), eah(begp:endp), o2(begp:endp), &
+                       co2(begp:endp), rb(begp:endp), dayl_factor(begp:endp), &
+                       atm2lnd_inst, temperature_inst, canopystate_inst, photosyns_inst)
+                  
+                  
+               end if
+            end if
+         end if
+         
       end do ITERATION     ! End stability iteration
       call t_stopf('can_iter')
 

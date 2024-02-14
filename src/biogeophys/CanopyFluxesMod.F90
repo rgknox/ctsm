@@ -444,7 +444,7 @@ contains
     ! calculations on every iteration of the energy balance solve, we can have a variable
     ! strength solution, where this step is called outside the main loop. The strength
     ! of the coupling tightness is therefore how many times we iterate the outer loop
-    integer, parameter :: max_iter_fates = 1
+    integer, parameter :: max_iter_fates = 2
     logical, parameter :: use_fates_vari_coupling = .true.
     
     integer :: dummy_to_make_pgi_happy

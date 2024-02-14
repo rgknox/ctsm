@@ -445,7 +445,7 @@ contains
     ! strength solution, where this step is called outside the main loop. The strength
     ! of the coupling tightness is therefore how many times we iterate the outer loop
     integer, parameter :: max_iter_fates = 2
-    logical, parameter :: use_fates_vari_coupling = .true.
+    logical, parameter :: use_fates_vari_coupling = .false.
     
     integer :: dummy_to_make_pgi_happy
     !------------------------------------------------------------------------------

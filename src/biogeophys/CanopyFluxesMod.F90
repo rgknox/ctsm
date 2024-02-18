@@ -1036,6 +1036,8 @@ contains
 
       ! Begin stability iteration
 
+      !print*,"BEGIN CANFLUX"
+      
       call t_startf('can_iter')
       patch_iterate: do f = 1,fn
 
@@ -1043,15 +1045,16 @@ contains
          c = patch%column(p)
          g = patch%gridcell(p)
 
+         !print*,"  Patch: ",p
 
-         num_iter_outer(p) = 0
+         num_iter(p) = 0
          rssun_old(p) = -100._r8
          rssha_old(p) = -100._r8
          itstoma = 0
          converge_stoma = .false.
          iterate_stoma: do while(.not.converge_stoma) 
 
-            num_iter(p) = 0  ! This is kinda meaningless with a double loop...
+            !!num_iter(p) = 0  ! This is kinda meaningless with a double loop...
 
             itlef = 0
             converge_tveg = .false.
@@ -1431,14 +1434,21 @@ contains
             reldel_rs = 2._r8*max( abs(rssun(p)-rssun_old(p))/(rssun(p)+rssun_old(p)), &
                  abs(rssha(p)-rssha_old(p))/(rssha(p)+rssha_old(p)) )
 
-            istoma_converge_if: if( itstoma>0 .and. (reldel_rs < reldel_rs_min) ) then
+            istoma_converge_if: if( (itstoma>0 .and. (reldel_rs < reldel_rs_min)) .or. itstoma>itmax_stoma_calcs  ) then
                converge_stoma = .true.
+
+               !write(*,'(A12,I4,A12,I2,5(2X,F8.3))') "    T it: ",itstoma," itlef: ",itlef,reldel_rs,rssun(p),rssun_old(p),rssha(p),rssha_old(p)
+               
             else
 
+               !write(*,'(A12,I4,A12,I2,5(2X,F8.3))') "    F it: ",itstoma," itlef: ",itlef,reldel_rs,rssun(p),rssun_old(p),rssha(p),rssha_old(p)
                ! Update the outer (stomata c) counter
                itstoma = itstoma + 1
-               num_iter_outer(p) = num_iter_outer(p) + 1
+               !num_iter_outer(p) = num_iter_outer(p) + 1
+               num_iter(p) = num_iter(p) + 1
+               
 
+               
                ! Reset the inner iteration counter
                itlef = 0
 
@@ -1452,7 +1462,7 @@ contains
                        svpts(begp:endp), eah(begp:endp), o2(begp:endp), &
                        co2(begp:endp), rb(begp:endp), dayl_factor(begp:endp), &
                        atm2lnd_inst, temperature_inst, canopystate_inst, photosyns_inst)
-
+                  
                else ! not use_fates
 
                   if ( use_hydrstress ) then

@@ -81,7 +81,7 @@ module CanopyFluxesMod
   logical, private :: use_undercanopy_stability = .false.      ! use undercanopy stability term or not
   integer, private :: itmax_canopy_fluxes = -1  ! max # of iterations used in subroutine CanopyFluxes
 
-  integer, parameter :: itmax_stoma_calcs = 4
+  integer, parameter :: itmax_stoma_calcs = 50
   
   character(len=*), parameter, private :: sourcefile = &
        __FILE__
@@ -1148,6 +1148,14 @@ contains
                ! we old the value calculated in the outer loop
                ! as constant during this inner loop (tveg) iteration
 
+               ! RGK: CALCULATE STOMATAL RESISTANCE THE FIRST TIME
+               if((itstoma==0) .and. (itlef == 0)) then
+                  call clm_fates%wrap_photosynthesis(nc, bounds, 1, filterp(f), &
+                       svpts(begp:endp), eah(begp:endp), o2(begp:endp), &
+                       co2(begp:endp), rb(begp:endp), dayl_factor(begp:endp), &
+                       atm2lnd_inst, temperature_inst, canopystate_inst, photosyns_inst)
+               end if
+               
                ! Sensible heat conductance for air, leaf and ground
                ! Moved the original subroutine in-line...
 
@@ -1432,7 +1440,7 @@ contains
             ! conductance at least once, and that was a small change
 
             reldel_rs = 2._r8*max( abs(rssun(p)-rssun_old(p))/(rssun(p)+rssun_old(p)), &
-                 abs(rssha(p)-rssha_old(p))/(rssha(p)+rssha_old(p)) )
+                                   abs(rssha(p)-rssha_old(p))/(rssha(p)+rssha_old(p)) )
 
             istoma_converge_if: if( (itstoma>0 .and. (reldel_rs < reldel_rs_min)) .or. itstoma>itmax_stoma_calcs  ) then
                converge_stoma = .true.

@@ -957,7 +957,7 @@ module CLMFatesInterfaceMod
          atm2lnd_inst, soilstate_inst, temperature_inst, active_layer_inst, &
          waterstatebulk_inst, waterdiagnosticbulk_inst, wateratm2lndbulk_inst, &
          canopystate_inst, soilbiogeochem_carbonflux_inst, frictionvel_inst, &
-         soil_water_retention_curve)
+         soil_water_retention_curve, photosyns_inst)
 
       ! This wrapper is called daily from clm_driver
       ! This wrapper calls ed_driver, which is the daily dynamics component of FATES
@@ -984,7 +984,8 @@ module CLMFatesInterfaceMod
       type(soilbiogeochem_carbonflux_type), intent(inout) :: soilbiogeochem_carbonflux_inst
       type(frictionvel_type)  , intent(inout)        :: frictionvel_inst
       class(soil_water_retention_curve_type), intent(in) :: soil_water_retention_curve
-
+      type(photosyns_type), intent(inout)            :: photosyns_inst
+      
       ! !LOCAL VARIABLES:
       integer  :: s                        ! site index
       integer  :: g                        ! grid-cell index (HLM)
@@ -1224,7 +1225,8 @@ module CLMFatesInterfaceMod
                                          waterdiagnosticbulk_inst,  &
                                          canopystate_inst, &
                                          soilbiogeochem_carbonflux_inst, &
-                                         .false.)
+                                         .false., &
+                                         photosyns_inst)
 
       ! ---------------------------------------------------------------------------------
       ! Part IV:
@@ -1400,7 +1402,8 @@ module CLMFatesInterfaceMod
    
    subroutine wrap_update_hlmfates_dyn(this, nc, bounds_clump,      &
         waterdiagnosticbulk_inst, canopystate_inst, &
-        soilbiogeochem_carbonflux_inst, is_initing_from_restart)
+        soilbiogeochem_carbonflux_inst, is_initing_from_restart, &
+        photosyns_inst)
 
       ! ---------------------------------------------------------------------------------
       ! This routine handles the updating of vegetation canopy diagnostics, (such as lai)
@@ -1414,7 +1417,7 @@ module CLMFatesInterfaceMod
      type(waterdiagnosticbulk_type)   , intent(inout)        :: waterdiagnosticbulk_inst
      type(canopystate_type)  , intent(inout)        :: canopystate_inst
      type(soilbiogeochem_carbonflux_type), intent(inout) :: soilbiogeochem_carbonflux_inst
-                   
+     type(photosyns_type), intent(inout),optional :: photosyns_inst
 
      ! is this being called during a read from restart sequence (if so then use the restarted fates
      ! snow depth variable rather than the CLM variable).
@@ -1533,6 +1536,7 @@ module CLMFatesInterfaceMod
           if (IsItDispersalTime()) dispersal_flag = .true.
        end if
 
+       
       do s = 1,this%fates(nc)%nsites
 
           c = this%f2hmap(nc)%fcolumn(s)
@@ -1549,6 +1553,14 @@ module CLMFatesInterfaceMod
           esai(col%patchi(c):col%patchf(c)) = 0.0_r8
           hbot(col%patchi(c):col%patchf(c)) = 0.0_r8
 
+          ! Set the stomatal conductance to ignore, this
+          ! is important to tracking the history output correctly. 
+
+          if(present(photosyns_inst))then
+             photosyns_inst%rssun_patch(col%patchi(c):col%patchf(c)) = spval
+             photosyns_inst%rssha_patch(col%patchi(c):col%patchf(c)) = spval
+          end if
+          
           if(use_fates_sp)then
             canopystate_inst%tlai_hist_patch(col%patchi(c):col%patchf(c)) = 0.0_r8
             canopystate_inst%tsai_hist_patch(col%patchi(c):col%patchf(c)) = 0.0_r8
@@ -1602,6 +1614,13 @@ module CLMFatesInterfaceMod
              esai(p) = this%fates(nc)%bc_out(s)%esai_pa(ifp)
              hbot(p) = this%fates(nc)%bc_out(s)%hbot_pa(ifp)
 
+             ! The land energy balance scheme uses the last stomatal
+             ! conductance as its first guess for the next step.
+             if(present(photosyns_inst))then
+                photosyns_inst%rssun_patch(p) = 0._r8
+                photosyns_inst%rssha_patch(p) = 0._r8
+             end if
+             
              if(use_fates_sp)then
                canopystate_inst%tlai_hist_patch(p) = this%fates(nc)%bc_out(s)%tlai_pa(ifp)
                canopystate_inst%tsai_hist_patch(p) = this%fates(nc)%bc_out(s)%tsai_pa(ifp)

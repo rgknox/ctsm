@@ -351,8 +351,8 @@ contains
 
     allocate(this%rssun_z_patch     (begp:endp,1:nlevcan)) ; this%rssun_z_patch     (:,:) = nan
     allocate(this%rssha_z_patch     (begp:endp,1:nlevcan)) ; this%rssha_z_patch     (:,:) = nan
-    allocate(this%rssun_patch       (begp:endp))           ; this%rssun_patch       (:)   = nan
-    allocate(this%rssha_patch       (begp:endp))           ; this%rssha_patch       (:)   = nan
+    allocate(this%rssun_patch       (begp:endp))           ; this%rssun_patch       (:)   = spval
+    allocate(this%rssha_patch       (begp:endp))           ; this%rssha_patch       (:)   = spval
     allocate(this%luvcmax25top_patch(begp:endp))           ; this%luvcmax25top_patch(:) = nan
     allocate(this%lujmax25top_patch (begp:endp))           ; this%lujmax25top_patch(:)  = nan
     allocate(this%lutpu25top_patch  (begp:endp))           ; this%lutpu25top_patch(:)   = nan

@@ -382,7 +382,6 @@ contains
     integer  :: fnorig                               ! number of values in patch filter copy
     integer  :: fporig(bounds%endp-bounds%begp+1)    ! temporary filter
     integer  :: fnold                                ! temporary copy of patch count
-    integer  :: num_iter_outer(bounds%endp-bounds%begp+1) ! iteration counter for outer loop
     real(r8) :: rssun_old(bounds%begp:bounds%endp)
     real(r8) :: rssha_old(bounds%begp:bounds%endp)
     integer  :: f                                    ! filter index
@@ -432,7 +431,7 @@ contains
     real(r8) :: carea_stem                               ! cross-sectional area of stem
     real(r8) :: dlrad_leaf                               ! Downward longwave radition from leaf
     real(r8) :: snocan_baseline(bounds%begp:bounds%endp) ! baseline of snocan for use in truncate_small_values
-    integer  :: n_iter_fates                             ! iteration loop counter if using weak fates coupling
+    integer  :: n_iter_stoma                             ! iteration loop counter for stomatal coupling
     real(r8) :: reldel_rs                                ! relative change in stomatal conductance old vs current
 
     ! Indices for raw and rah
@@ -451,12 +450,13 @@ contains
     logical :: converge_tveg  ! logical swithc that flags if the stomatal loop converged
 
 
-    ! FATES variable coupling strength. Instead of calling fates photosynthesis/stomatal resistance
+    ! Asynchronous stomatal conductance coupling.
+    ! Instead of calling photosynthesis/stomatal resistance
     ! calculations on every iteration of the energy balance solve, we can have a variable
     ! strength solution, where this step is called outside the main loop. The strength
     ! of the coupling tightness is therefore how many times we iterate the outer loop
-    integer, parameter :: max_iter_fates = 40
-    logical, parameter :: use_fates_vari_coupling = .true.
+
+    logical, parameter :: use_vari_coupling = .true.
 
     integer :: dummy_to_make_pgi_happy
     !------------------------------------------------------------------------------
@@ -1034,16 +1034,12 @@ contains
 
       ! Begin stability iteration
 
-      !print*,"BEGIN CANFLUX"
-      
       call t_startf('can_iter')
       patch_iterate: do f = 1,fn
 
          p = filterp(f)
          c = patch%column(p)
          g = patch%gridcell(p)
-
-         !print*,"  Patch: ",p
 
          num_iter(p) = 0
          rssun_old(p) = -100._r8
@@ -1052,7 +1048,6 @@ contains
          converge_stoma = .false.
          iterate_stoma: do while(.not.converge_stoma) 
 
-            !!num_iter(p) = 0  ! This is kinda meaningless with a double loop...
 
             itlef = 0
             converge_tveg = .false.
@@ -1146,13 +1141,6 @@ contains
                ! we old the value calculated in the outer loop
                ! as constant during this inner loop (tveg) iteration
 
-               ! RGK: CALCULATE STOMATAL RESISTANCE THE FIRST TIME
-               if((itstoma==0) .and. (itlef == 0)) then
-                  call clm_fates%wrap_photosynthesis(nc, bounds, 1, filterp(f), &
-                       svpts(begp:endp), eah(begp:endp), o2(begp:endp), &
-                       co2(begp:endp), rb(begp:endp), dayl_factor(begp:endp), &
-                       atm2lnd_inst, temperature_inst, canopystate_inst, photosyns_inst)
-               end if
                
                ! Sensible heat conductance for air, leaf and ground
                ! Moved the original subroutine in-line...
@@ -1442,18 +1430,12 @@ contains
 
             istoma_converge_if: if( (itstoma>0 .and. (reldel_rs < reldel_rs_min)) .or. itstoma>itmax_stoma_calcs  ) then
                converge_stoma = .true.
-
-               !write(*,'(A12,I4,A12,I2,5(2X,F8.3))') "    T it: ",itstoma," itlef: ",itlef,reldel_rs,rssun(p),rssun_old(p),rssha(p),rssha_old(p)
                
             else
 
-               !write(*,'(A12,I4,A12,I2,5(2X,F8.3))') "    F it: ",itstoma," itlef: ",itlef,reldel_rs,rssun(p),rssun_old(p),rssha(p),rssha_old(p)
                ! Update the outer (stomata c) counter
                itstoma = itstoma + 1
-               !num_iter_outer(p) = num_iter_outer(p) + 1
                num_iter(p) = num_iter(p) + 1
-               
-
                
                ! Reset the inner iteration counter
                itlef = 0

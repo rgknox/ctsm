@@ -284,9 +284,7 @@ contains
     real(r8), parameter :: dtmin = 0.01_r8  ! max limit for temperature convergence [K]
     integer , parameter :: itmin = 2        ! minimum number of iteration [-]
 
-    real(r8), parameter :: reldel_rs_min = 0.01_r8  ! max relative limit for stomatal convergence 
-
-
+    real(r8), parameter :: reldel_rs_min = 0.001_r8  ! max relative limit for stomatal convergence 
 
     !added by K.Sakaguchi for stability formulation
     real(r8), parameter :: ria  = 0.5_r8             ! free parameter for stable formulation (currently = 0.5, "gamma" in Sakaguchi&Zeng,2008)
@@ -457,8 +455,8 @@ contains
     ! calculations on every iteration of the energy balance solve, we can have a variable
     ! strength solution, where this step is called outside the main loop. The strength
     ! of the coupling tightness is therefore how many times we iterate the outer loop
-    integer, parameter :: max_iter_fates = 2
-    logical, parameter :: use_fates_vari_coupling = .false.
+    integer, parameter :: max_iter_fates = 40
+    logical, parameter :: use_fates_vari_coupling = .true.
 
     integer :: dummy_to_make_pgi_happy
     !------------------------------------------------------------------------------

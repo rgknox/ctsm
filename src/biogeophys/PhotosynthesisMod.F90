@@ -605,12 +605,12 @@ contains
 
     this%rssun_patch(begp:endp) = spval
     call hist_addfld1d (fname='RSSUN', units='s/m',  &
-         avgflag='M', long_name='sunlit leaf stomatal resistance', &
+         avgflag='A', long_name='sunlit leaf stomatal resistance', &
          ptr_patch=this%rssun_patch, l2g_scale_type='veg')
 
     this%rssha_patch(begp:endp) = spval
     call hist_addfld1d (fname='RSSHA', units='s/m',  &
-         avgflag='M', long_name='shaded leaf stomatal resistance', &
+         avgflag='A', long_name='shaded leaf stomatal resistance', &
          ptr_patch=this%rssha_patch, l2g_scale_type='veg')
 
     this%gs_mol_sun_patch(begp:endp,:) = spval

@@ -36,6 +36,34 @@ module MLCLMCanopyCouplerMod
 
 contains
 
+  subroutine TransferMLCLMParams()
+
+    use MLSolarRadiationMod, only : rad_params
+    use MLSolarRadiationMod, only : AllocateRadParams
+    
+    integer :: ft,ib  ! loop indices
+
+    call AllocateRadParams(numpft)
+
+    do ft = 1,numpft
+       do ib = 1,numrad
+
+          rad_params%rhol(ib,ft) = EDPftvarcon_inst%rhol(ft,ib)
+          rad_params%rhos(ib,ft) = EDPftvarcon_inst%rhos(ft,ib)
+          rad_params%taul(ib,ft) = EDPftvarcon_inst%taul(ft,ib)
+          rad_params%taus(ib,ft) = EDPftvarcon_inst%taus(ft,ib)
+
+       end do
+       rad_params%xl(ft) = EDPftvarcon_inst%xl(ft)
+       rad_params%clumping_index(ft) = EDPftvarcon_inst%clumping_index(ft)
+    end do
+    
+    call RadParamPrep()
+
+    return
+  end subroutine TransferCLMMLParams
+  
+  
 
   !-----------------------------------------------------------------------
 

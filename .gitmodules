@@ -35,7 +35,7 @@ fxDONOTUSEurl = https://github.com/NCAR/fates-release
 
 [submodule "mlcanopycore"]
 	path = src/ml_canopy/core
-	url = https://github.com/rgknox/MlCanopyCore
+	url = https://github.com/rgknox/MLCanopyCore
 fxrequired = AlwaysRequired
 
 [submodule "cism"]

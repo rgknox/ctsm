@@ -40,29 +40,47 @@ contains
 
     use MLSolarRadiationMod, only : rad_params
     use MLSolarRadiationMod, only : AllocateRadParams
+    use MLLeafPhotosynthesisMod, only : photo_params
+    use MLLeafPhotosynthesisMod, only : AllocatePhotoParams
     
     integer :: ft,ib  ! loop indices
 
-    call AllocateRadParams(numpft)
-
+    ! Solar Radiation Parameters
+    call AllocateRadParams(0,numpft)
     do ft = 1,numpft
        do ib = 1,numrad
-
-          rad_params%rhol(ib,ft) = EDPftvarcon_inst%rhol(ft,ib)
-          rad_params%rhos(ib,ft) = EDPftvarcon_inst%rhos(ft,ib)
-          rad_params%taul(ib,ft) = EDPftvarcon_inst%taul(ft,ib)
-          rad_params%taus(ib,ft) = EDPftvarcon_inst%taus(ft,ib)
-
+          rad_params%rhol(ib,ft) = pftcon%rhol(ib,ft)
+          rad_params%rhos(ib,ft) = pftcon%rhos(ib,ft)
+          rad_params%taul(ib,ft) = pftcon%taul(ib,ft)
+          rad_params%taus(ib,ft) = pftcon%taus(ib,ft)
        end do
-       rad_params%xl(ft) = EDPftvarcon_inst%xl(ft)
-       rad_params%clumping_index(ft) = EDPftvarcon_inst%clumping_index(ft)
+       rad_params%xl(ft)           = pftcon%xl(ft)
+       rad_params%clumping_fac(ft) = pftcon%clumping_fac(ft)
+    end do
+
+    ! Photosynthesis parameters
+    call AllocatePhotoParams(0,numpft)
+    do ft = 0,numpft
+       photo_params%c3psn(ft)     = pftcon%c3psn(ft)
+       photo_params%g0_BB(ft)     = spval  !DNE
+       photo_params%g1_BB(ft)     = pftcon%mbbopt(ft)
+       photo_params%g0_MED(ft)    = pftcon%medlynintercept(ft)
+       photo_params%g1_MED(ft)    = pftcon%medlynslope(ft)
+       photo_params%psi50_gs(ft)  = spval  !DNE
+       photo_params%shape_gs(ft)  = spval  !DNE
+       photo_params%gsmin_SPA(ft) = spval  !DNE
+       photo_params%iota_SPA(ft)  = spval  !DNE
     end do
     
-    call RadParamPrep()
+
+    
 
     return
   end subroutine TransferCLMMLParams
   
+
+
+
   
 
   !-----------------------------------------------------------------------
@@ -84,10 +102,20 @@ contains
     call InitMLHistory(mlcanopy,bounds)
     call mlcanopy%InitCold()
 
+    call InitVarPar()
+
+    
   end subroutine Init
   
   !-----------------------------------------------------------------------
 
+  subroutine InitVarPar()
+    
+    
+
+    
+  end subroutine InitVarPar
+  
   subroutine InitMLHistory (mlcanopy, bounds)
     !
     ! !DESCRIPTION:

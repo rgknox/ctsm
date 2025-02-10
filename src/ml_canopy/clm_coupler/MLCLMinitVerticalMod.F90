@@ -85,7 +85,8 @@ contains
     dlai_frac   => mlcanopy_inst%dlai_frac_profile   , &  ! Canopy layer leaf area index (fraction of canopy total)
     dsai_frac   => mlcanopy_inst%dsai_frac_profile   , &  ! Canopy layer stem area index (fraction of canopy total)
     zs          => mlcanopy_inst%zs_profile          , &  ! Canopy layer height for scalar concentration and source (m)
-    dz          => mlcanopy_inst%dz_profile            &  ! Canopy layer thickness (m)
+    dz          => mlcanopy_inst%dz_profile          , &  ! Canopy layer thickness (m)
+    dleaf_prof  => mlcanopy_inst%dleaf_profile         &  ! Mean leaf width over canopy (constant value, set to pftcon)
     )
 
     do fp = 1, num_filter
@@ -309,8 +310,31 @@ contains
           dsai_frac(p,ic) = dsai(p,ic) / esai(p)
        end do
 
-    end do
 
+       ! Assign the pft's leaf diameter trait, uniformly
+       ! to the profile. (we do this because this trait
+       ! is NOT uniform using models with mixed canopies,
+       ! ie FATES)
+       
+       do ic = 1, ncan(p)
+          dleaf_prof(p,ic) = pftcon%dleaf(patch%itype(p))
+       end do
+
+       ! In case we want to use the radiation scattering
+       ! with FATES, we will have to pre-process these scattering
+       ! indices
+       !do ic = ntop(p)
+       !   do ib = 1, numrad
+       !      rhol_prof(p,ic,ib) = pftcon%rhol(pft_index(p),ib)
+       !      rhos_prof(p,ic,ib) = pftcon%rhos(pft_index(p),ib)
+       !      taul_prof(p,ic,ib) = pftcon%taul(pft_index(p),ib)
+       !      taus_prof(p,ic,ib) = pftcon%taus(pft_index(p),ib)
+       !   end do
+       !end do
+       
+       
+    end do
+    
     end associate
   end subroutine initVerticalStructure
 

@@ -1,4 +1,4 @@
-module MLCanopyFluxesMod
+module MLCanopyDriverMod
 
   !-----------------------------------------------------------------------
   ! !DESCRIPTION:
@@ -6,7 +6,7 @@ module MLCanopyFluxesMod
   !
   ! !USES:
   use shr_kind_mod           , only : r8 => shr_kind_r8
-  use abortutils             , only : endrun
+  use MLCanopyVarCtl         , only : endrun
   use clm_varctl             , only : iulog
   use decompMod              , only : bounds_type
   use atm2lndType            , only : atm2lnd_type
@@ -57,14 +57,14 @@ module MLCanopyFluxesMod
     !
     ! !USES:
     use clm_time_manager, only : get_nstep, get_step_size, get_curr_calday
-    use clm_varcon, only : grav, pi => rpi, spval
+    use MLCanopyVarCon, only : grav, pi => rpi, spval
     use clm_varorb, only : eccen, obliqr, lambm0, mvelpp
-    use clm_varpar, only : ivis, inir
+    use MLCanopyVarPar, only : ivis, inir
     use shr_orb_mod, only : shr_orb_decl, shr_orb_cosz
     use spmdMod, only : masterproc
-    use MLclm_varcon, only : mmh2o, mmdry, cpd, cpw, rgas, wind_forc_min, lapse_rate
-    use MLclm_varctl, only : mlcan_to_clm, dtime_substep, ml_vert_init, fracdir
-    use MLclm_varpar, only : isun, isha, nlevmlcan, nleaf
+    use MLCanopyVarCon, only : mmh2o, mmdry, cpd, cpw, rgas, wind_forc_min, lapse_rate
+    use MLCanopyVarCtl, only : mlcan_to_clm, dtime_substep, ml_vert_init, fracdir
+    use MLCanopyVarPar, only : isun, isha, nlevmlcan, nleaf
     use MLCanopyNitrogenProfileMod, only : CanopyNitrogenProfile
     use MLCanopyTurbulenceMod, only : CanopyTurbulence
     use MLCanopyWaterMod, only : CanopyInterception, CanopyEvaporation
@@ -783,9 +783,9 @@ module MLCanopyFluxesMod
     ! other canopy diagnostics
     !
     ! !USES:
-    use clm_varpar, only : ivis, inir
-    use MLclm_varctl, only : turb_type
-    use MLclm_varpar, only : isun, isha
+    use MLCanopyVarPar, only : ivis, inir
+    use MLCanopyVarCtl, only : turb_type
+    use MLCanopyVarPar, only : isun, isha
     use MLWaterVaporMod, only : LatVap
     !
     ! !ARGUMENTS:
@@ -1164,4 +1164,4 @@ module MLCanopyFluxesMod
     end associate
   end subroutine CanopyFluxesDiagnostics
 
-end module MLCanopyFluxesMod
+end module MLCanopyDriverMod

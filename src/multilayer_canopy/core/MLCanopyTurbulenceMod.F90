@@ -5,7 +5,7 @@ module MLCanopyTurbulenceMod
   ! Scalar source/sink fluxes and scalar profiles
   !
   ! !USES:
-  use abortutils, only : endrun
+  use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog, rslfile
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
@@ -44,7 +44,7 @@ contains
     ! scalar profiles above and within the canopy
     !
     ! !USES:
-    use MLclm_varctl, only : turb_type
+    use MLCanopyVarCtl, only : turb_type
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:
@@ -86,9 +86,9 @@ contains
     ! (well-mixed assumption) or are read in from dataset
     !
     ! !USES:
-    use MLclm_varctl, only : turb_type
-    use MLclm_varcon, only : cd
-    use MLclm_varpar, only : isun, isha
+    use MLCanopyVarCtl, only : turb_type
+    use MLCanopyVarCon, only : cd
+    use MLCanopyVarPar, only : isun, isha
     use MLLeafFluxesMod, only : LeafFluxes
     use MLMathToolsMod, only : hybrid
     use MLSoilFluxesMod, only : SoilFluxes
@@ -249,7 +249,7 @@ contains
     ! sublayer (RSL) parameterization 
     !
     ! !USES:
-    use MLclm_varcon, only : mmh2o, mmdry, cd, eta_max
+    use MLCanopyVarCon, only : mmh2o, mmdry, cd, eta_max
     use MLMathToolsMod, only : hybrid
     use MLCanopyFluxesType, only : mlcanopy_type
     !
@@ -478,9 +478,9 @@ contains
     ! Obukhov length does not change value between iterations.
     !
     ! !USES:
-    use clm_varcon, only : grav, vkc
-    use MLclm_varctl, only : sparse_canopy_type
-    use MLclm_varcon, only : beta_neutral_max, cr, z0mg, zeta_min, zeta_max
+    use MLCanopyVarCon, only : grav, vkc
+    use MLCanopyVarCtl, only : sparse_canopy_type
+    use MLCanopyVarCon, only : beta_neutral_max, cr, z0mg, zeta_min, zeta_max
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:
@@ -623,7 +623,7 @@ contains
     ! Calculate beta = u* / u(h) for current Obukhov length
     !
     ! !USES:
-    use MLclm_varcon, only : beta_min, beta_max
+    use MLCanopyVarCon, only : beta_min, beta_max
     !
     ! !ARGUMENTS:
     implicit none
@@ -690,8 +690,8 @@ contains
     ! top for current Obukhov length
     !
     ! !USES:
-    use MLclm_varctl, only : sparse_canopy_type
-    use MLclm_varcon, only : Pr0, Pr1, Pr2
+    use MLCanopyVarCtl, only : sparse_canopy_type
+    use MLCanopyVarCon, only : Pr0, Pr1, Pr2
     !
     ! !ARGUMENTS:
     implicit none
@@ -722,8 +722,8 @@ contains
     ! These are evaluated between the height za and the canopy height hc.
     !
     ! !USES:
-    use clm_varcon, only : vkc
-    use MLclm_varcon, only : c2, dtLgridM, zdtgridM, psigridM, dtLgridH, zdtgridH, psigridH
+    use MLCanopyVarCon, only : vkc
+    use MLCanopyVarCon, only : c2, dtLgridM, zdtgridM, psigridM, dtLgridH, zdtgridH, psigridH
     !
     ! !ARGUMENTS:
     implicit none
@@ -867,7 +867,7 @@ contains
     ! Monin-Obukhov psi stability function for momentum
     !
     ! !USES:
-    use clm_varcon, only : pi => rpi
+    use MLCanopyVarCon, only : pi => rpi
     !
     ! !ARGUMENTS:
     implicit none
@@ -930,7 +930,7 @@ contains
     ! represents psihat as it appears in the RSL equations.
     !
     ! !USES:
-    use MLclm_varcon, only : nZ, nL
+    use MLCanopyVarCon, only : nZ, nL
     !
     ! !ARGUMENTS:
     implicit none
@@ -1017,7 +1017,7 @@ contains
     ! Calculate roughness length for momentum
     !
     ! !USES:
-    use clm_varcon, only : vkc
+    use MLCanopyVarCon, only : vkc
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:
@@ -1117,8 +1117,8 @@ contains
     ! Wind speed profile above and within canopy
     !
     ! !USES:
-    use clm_varcon, only : vkc
-    use MLclm_varcon, only : wind_min
+    use MLCanopyVarCon, only : vkc
+    use MLCanopyVarCon, only : wind_min
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:
@@ -1193,9 +1193,9 @@ contains
     ! Conductances are defined between zs(i) and zs(i+1).
     !
     ! !USES:
-    use clm_varcon, only : vkc
-    use MLclm_varctl, only : HF_extension_type
-    use MLclm_varcon, only : z0mg, ra_max
+    use MLCanopyVarCon, only : vkc
+    use MLCanopyVarCtl, only : HF_extension_type
+    use MLCanopyVarCon, only : z0mg, ra_max
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:
@@ -1379,8 +1379,8 @@ contains
     ! calculated as part of the implicit solution.
     !
     ! !USES:
-    use MLclm_varctl, only : dtime_substep
-    use MLclm_varpar, only : isun, isha, nlevmlcan, nleaf
+    use MLCanopyVarCtl, only : dtime_substep
+    use MLCanopyVarPar, only : isun, isha, nlevmlcan, nleaf
     use MLLeafFluxesMod, only : LeafFluxes
     use MLMathToolsMod, only: tridiag_2eq
     use MLSoilFluxesMod, only : SoilFluxes
@@ -1943,7 +1943,7 @@ contains
     use ncdio_pio, only : ncd_io, ncd_pio_closefile, ncd_pio_openfile, file_desc_t
     use ncdio_pio, only : ncd_inqdid, ncd_inqdlen
     use spmdMod, only : masterproc
-    use MLclm_varcon, only : nZ, nL, dtLgridM, zdtgridM, psigridM, dtLgridH, zdtgridH, psigridH
+    use MLCanopyVarCon, only : nZ, nL, dtLgridM, zdtgridM, psigridM, dtLgridH, zdtgridH, psigridH
     !
     ! !ARGUMENTS:
     implicit none

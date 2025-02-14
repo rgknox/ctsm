@@ -1,16 +1,18 @@
-module MLclm_varctl
+module MLCanopyVarCtl
 
   !-----------------------------------------------------------------------
   ! !DESCRIPTION:
   ! Module containing multilayer canopy model run control variables
   !
   ! !USES:
-  use clm_varcon, only : ispval
+  use MLCanopyVarCon, only : ispval
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
   ! !PUBLIC TYPES:
   implicit none
 
+  public :: endrun
+  
   ! Model run options
 
   character(len=6) :: clm_phys = 'CLM4_5' ! Snow/soil layers differ for CLM4.5 and CLM5. Options: 'CLM4_5' or 'CLM5_0'
@@ -47,4 +49,27 @@ module MLclm_varctl
 
   real(r8), save :: dtime_substep = 5._r8 * 60._r8
 
-end module MLclm_varctl
+contains
+  
+  subroutine endrun(msg) 
+
+    use shr_sys_mod,  only : shr_sys_abort
+    
+    !-----------------------------------------------------------------------
+    ! !DESCRIPTION:
+    ! Abort the model for abnormal termination
+    ! This subroutine was derived from CLM's
+    ! endrun_vanilla() in abortutils.F90
+    !
+    !
+    ! !ARGUMENTS:
+    implicit none
+    character(len=*), intent(in) :: msg    ! string to be printed
+    !-----------------------------------------------------------------------
+    
+    write(log_unit,*)'ML-ENDRUN:', msg
+    call shr_sys_abort()
+    
+  end subroutine endrun
+  
+end module MLCanopyVarCtl

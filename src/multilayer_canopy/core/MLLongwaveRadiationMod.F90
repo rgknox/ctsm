@@ -5,7 +5,7 @@ module MLLongwaveRadiationMod
   ! Calculate longwave radiation transfer through canopy
   !
   ! !USES:
-  use abortutils, only : endrun
+  use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog
   use decompMod, only : bounds_type
   use shr_kind_mod, only : r8 => shr_kind_r8
@@ -30,7 +30,7 @@ contains
     ! Longwave radiation transfer through canopy
     !
     ! !USES:
-    use MLclm_varctl, only : longwave_type
+    use MLCanopyVarCtl, only : longwave_type
     !
     ! !ARGUMENTS:
     implicit none
@@ -56,11 +56,11 @@ contains
     ! Longwave radiation transfer through canopy using Norman (1979)
     !
     ! !USES:
-    use clm_varcon, only : sb
+    use MLCanopyVarCon, only : sb
     use PatchType, only : patch
     use pftconMod, only : pftcon
-    use MLclm_varcon, only : emg
-    use MLclm_varpar, only : isun, isha, nlevmlcan
+    use MLCanopyVarCon, only : emg
+    use MLCanopyVarPar, only : isun, isha, nlevmlcan
     use MLMathToolsMod, only : tridiag
     use MLCanopyFluxesType, only : mlcanopy_type
     !

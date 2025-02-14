@@ -5,7 +5,7 @@ module MLLeafBoundaryLayerMod
   ! Leaf boundary layer conductance
   !
   ! !USES:
-  use abortutils, only : endrun
+  use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
@@ -25,11 +25,11 @@ contains
     ! Leaf boundary layer conductance
     !
     ! !USES:
-    use clm_varcon, only : tfrz, grav
+    use MLCanopyVarCon, only : tfrz, grav
     use PatchType, only : patch
     use pftconMod, only : pftcon
-    use MLclm_varcon, only : visc0, dh0, dv0, dc0, gb_factor
-    use MLclm_varctl, only : gb_type
+    use MLCanopyVarCon, only : visc0, dh0, dv0, dc0, gb_factor
+    use MLCanopyVarCtl, only : gb_type
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:

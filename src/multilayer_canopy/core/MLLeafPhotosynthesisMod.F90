@@ -5,7 +5,7 @@ module MLLeafPhotosynthesisMod
   ! Calculate leaf photosynthesis and stomatal conductance
   !
   ! !USES:
-  use abortutils, only : endrun
+  use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
@@ -35,8 +35,8 @@ contains
     ! Photosynthesis temperature response
     !
     ! !USES:
-    use clm_varcon, only : tfrz
-    use MLclm_varcon, only : rgas
+    use MLCanopyVarCon, only : tfrz
+    use MLCanopyVarCon, only : rgas
     !
     ! !ARGUMENTS:
     implicit none
@@ -58,7 +58,7 @@ contains
     ! Photosynthesis temperature inhibition
     !
     ! !USES:
-    use MLclm_varcon, only : rgas
+    use MLCanopyVarCon, only : rgas
     !
     ! !ARGUMENTS:
     implicit none
@@ -82,8 +82,8 @@ contains
     ! Scaling factor for photosynthesis temperature inhibition
     !
     ! !USES:
-    use clm_varcon, only : tfrz
-    use MLclm_varcon, only : rgas
+    use MLCanopyVarCon, only : tfrz
+    use MLCanopyVarCon, only : rgas
     !
     ! !ARGUMENTS:
     implicit none
@@ -105,17 +105,17 @@ contains
     ! Leaf photosynthesis and stomatal conductance
     !
     ! !USES:
-    use clm_varcon, only : tfrz
+    use MLCanopyVarCon, only : tfrz
     use PatchType, only : patch
     use pftconMod, only : pftcon
-    use MLclm_varcon, only: kc25, ko25, cp25, kcha, koha, cpha
-    use MLclm_varcon, only: vcmaxha_noacclim, vcmaxha_acclim, jmaxha_noacclim, jmaxha_acclim
-    use MLclm_varcon, only: vcmaxhd_noacclim, vcmaxhd_acclim, jmaxhd_noacclim, jmaxhd_acclim
-    use MLclm_varcon, only: vcmaxse_noacclim, vcmaxse_acclim, jmaxse_noacclim, jmaxse_acclim
-    use MLclm_varcon, only: rdha, rdhd, rdse
-    use MLclm_varcon, only: phi_psII, theta_j, vpd_min_MED, rh_min_BB
-    use MLclm_varcon, only: dh2o_to_dco2
-    use MLclm_varctl, only : gs_type, acclim_type, gspot_type
+    use MLCanopyVarCon, only: kc25, ko25, cp25, kcha, koha, cpha
+    use MLCanopyVarCon, only: vcmaxha_noacclim, vcmaxha_acclim, jmaxha_noacclim, jmaxha_acclim
+    use MLCanopyVarCon, only: vcmaxhd_noacclim, vcmaxhd_acclim, jmaxhd_noacclim, jmaxhd_acclim
+    use MLCanopyVarCon, only: vcmaxse_noacclim, vcmaxse_acclim, jmaxse_noacclim, jmaxse_acclim
+    use MLCanopyVarCon, only: rdha, rdhd, rdse
+    use MLCanopyVarCon, only: phi_psII, theta_j, vpd_min_MED, rh_min_BB
+    use MLCanopyVarCon, only: dh2o_to_dco2
+    use MLCanopyVarCtl, only : gs_type, acclim_type, gspot_type
     use MLMathToolsMod, only : hybrid, quadratic
     use MLWaterVaporMod, only : SatVap
     use MLCanopyFluxesType, only : mlcanopy_type
@@ -476,8 +476,8 @@ contains
     ! !USES:
     use PatchType, only : patch
     use pftconMod, only : pftcon
-    use MLclm_varcon, only : qe_c4, vpd_min_MED, colim_c3a, colim_c4a, colim_c4b, dh2o_to_dco2
-    use MLclm_varctl, only : colim_type, gs_type
+    use MLCanopyVarCon, only : qe_c4, vpd_min_MED, colim_c3a, colim_c4a, colim_c4b, dh2o_to_dco2
+    use MLCanopyVarCtl, only : colim_type, gs_type
     use MLMathToolsMod, only : quadratic
     use MLCanopyFluxesType, only : mlcanopy_type
     !
@@ -697,8 +697,8 @@ contains
     ! !USES:
     use PatchType, only : patch
     use pftconMod, only : pftcon
-    use MLclm_varcon, only : qe_c4, colim_c3a, colim_c4a, colim_c4b, dh2o_to_dco2
-    use MLclm_varctl, only : colim_type
+    use MLCanopyVarCon, only : qe_c4, colim_c3a, colim_c4a, colim_c4b, dh2o_to_dco2
+    use MLCanopyVarCtl, only : colim_type
     use MLMathToolsMod, only : quadratic
     use MLCanopyFluxesType, only : mlcanopy_type
     !
@@ -963,7 +963,7 @@ contains
     ! !USES:
     use PatchType, only : patch
     use pftconMod, only : pftcon
-    use MLclm_varcon, only: vpd_min_MED
+    use MLCanopyVarCon, only: vpd_min_MED
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:

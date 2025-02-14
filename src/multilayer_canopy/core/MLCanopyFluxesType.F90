@@ -5,12 +5,11 @@ module MLCanopyFluxesType
   ! Multilayer canopy module data structure
   !
   ! !USES:
-  use abortutils, only : endrun
-  use clm_varcon, only : ispval, spval
-  use clm_varpar, only : nlevgrnd, numrad
-  use decompMod , only : bounds_type
+  use MLCanopyVarCtl, only : endrun
+  use MLCanopyVarCon, only : ispval, spval
+  use MLCanopyVarPar, only : nlevgrnd, numrad
   use shr_kind_mod, only : r8 => shr_kind_r8
-  use MLclm_varpar, only : nlevmlcan, nleaf
+  use MLCanopyVarPar, only : nlevmlcan, nleaf
   !
   ! !PUBLIC TYPES:
   implicit none
@@ -31,6 +30,16 @@ module MLCanopyFluxesType
     ! var_leaf    = multi-level variable at each canopy layer for sunlit and shaded leaves
     ! ------------------------------------------------------------------------------------
 
+
+    integer         :: begp      ! Begining index for canopy unit
+    integer         :: endp      ! Ending index fo canopy unit
+
+    integer,pointer :: filter(:) ! Vector list of indices upon which
+                                 ! to perform calculations. Indicates
+                                 ! which of these canopy sites are
+                                 ! active.
+    integer         :: nfilter
+     
     ! Vegetation input variables: dimension is (patch)
 
     real(r8), pointer :: ztop_canopy(:)          ! Canopy foliage top height (m)
@@ -677,7 +686,7 @@ contains
     ! Cold-start initialization for multilayer canopy
     !
     ! !USES:
-    use MLclm_varpar, only : nlevmlcan, isun, isha
+    MLCanopyVarPar, only : nlevmlcan, isun, isha
     !
     ! !ARGUMENTS:
     class(mlcanopy_type) :: this

@@ -5,7 +5,7 @@ module MLWaterVaporMod
   ! Calculate saturation vapor pressure and latent heat of vaporization
   !
   ! !USES:
-  use abortutils, only : endrun
+  use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
@@ -29,7 +29,7 @@ contains
     ! Journal of Applied Meteorology 31:1507-1513
     !
     ! !USES:
-    use clm_varcon, only : tfrz
+    use MLCanopyVarCon, only : tfrz
     !
     ! !ARGUMENTS:
     implicit none
@@ -117,8 +117,8 @@ contains
     ! Latent heat of vaporization in relation to air temperature, as in CLM
     !
     ! !USES:
-    use clm_varcon, only : tfrz, hvap, hsub
-    use MLclm_varcon, only : mmh2o
+    use MLCanopyVarCon, only : tfrz, hvap, hsub
+    use MLCanopyVarCon, only : mmh2o
     !
     ! !ARGUMENTS:
     implicit none

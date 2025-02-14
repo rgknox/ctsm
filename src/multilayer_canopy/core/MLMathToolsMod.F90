@@ -5,7 +5,7 @@ module MLMathToolsMod
   ! Math tools
   !
   ! !USES:
-  use abortutils, only : endrun
+  use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   use MLCanopyFluxesType, only : mlcanopy_type
@@ -402,7 +402,7 @@ contains
     ! for air temperature and water vapor at each layer
     !
     ! !USES:
-    use MLclm_varpar, only : nlevmlcan
+    use MLCanopyVarPar, only : nlevmlcan
     !
     ! !ARGUMENTS:
     implicit none

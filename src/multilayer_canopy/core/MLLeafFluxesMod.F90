@@ -5,7 +5,7 @@ module MLLeafFluxesMod
   ! Leaf temperature and energy fluxes
   !
   ! !USES:
-  use abortutils, only : endrun
+  use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
@@ -25,7 +25,7 @@ contains
     ! Leaf temperature and energy fluxes
     !
     ! !USES:
-    use MLclm_varctl, only : dtime_substep
+    use MLCanopyVarCtl, only : dtime_substep
     use MLWaterVaporMod, only : SatVap, LatVap
     use MLCanopyFluxesType, only : mlcanopy_type
     !

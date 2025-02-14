@@ -5,7 +5,7 @@ module MLLeafHeatCapacityMod
   ! Leaf heat capacity
   !
   ! !USES:
-  use abortutils, only : endrun
+  use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
@@ -25,10 +25,10 @@ contains
     ! Leaf heat capacity
     !
     ! !USES:
-    use clm_varcon, only : cpliq
+    use MLCanopyVarCon, only : cpliq
     use PatchType, only : patch
     use pftconMod, only : pftcon
-    use MLclm_varcon, only : cpbio, fcarbon, fwater
+    use MLCanopyVarCon, only : cpbio, fcarbon, fwater
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:

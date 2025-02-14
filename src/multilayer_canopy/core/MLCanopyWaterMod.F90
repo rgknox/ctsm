@@ -5,7 +5,7 @@ module MLCanopyWaterMod
   ! Update canopy water
   !
   ! !USES:
-  use abortutils, only : endrun
+  use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
@@ -26,9 +26,9 @@ contains
     ! Interception and throughfall
     !
     ! !USES:
-    use MLclm_varcon, only : dewmx, maximum_leaf_wetted_fraction, interception_fraction, fwet_exponent
-    use MLclm_varcon, only : clm45_interception_p1, clm45_interception_p2
-    use MLclm_varctl, only : dtime_substep, fpi_type
+    use MLCanopyVarCon, only : dewmx, maximum_leaf_wetted_fraction, interception_fraction, fwet_exponent
+    use MLCanopyVarCon, only : clm45_interception_p1, clm45_interception_p2
+    use MLCanopyVarCtl, only : dtime_substep, fpi_type
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:
@@ -177,9 +177,9 @@ contains
     ! Update canopy intercepted water for evaporation and dew
     !
     ! !USES:
-    use MLclm_varcon, only : mmh2o
-    use MLclm_varctl, only : dtime_substep
-    use MLclm_varpar, only : isun, isha
+    use MLCanopyVarCon, only : mmh2o
+    use MLCanopyVarCtl, only : dtime_substep
+    use MLCanopyVarPar, only : isun, isha
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:

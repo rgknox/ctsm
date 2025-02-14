@@ -5,7 +5,7 @@ module MLSolarRadiationMod
   ! Calculate solar radiation transfer through canopy
   !
   ! !USES:
-  use abortutils, only : endrun
+  use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog
   use decompMod, only : bounds_type
   use PatchType, only : patch
@@ -33,11 +33,11 @@ contains
     ! Solar radiation transfer through canopy
     !
     ! !USES:
-    use clm_varcon, only : pi => rpi
-    use clm_varpar, only : numrad, ivis
-    use MLclm_varcon, only : chil_max, chil_min, kb_max, J_to_umol
-    use MLclm_varctl, only : light_type, leaf_optics_type
-    use MLclm_varpar, only : nlevmlcan, isun, isha
+    use MLCanopyVarCon, only : pi => rpi
+    use MLCanopyVarPar, only : numrad, ivis
+    use MLCanopyVarCon, only : chil_max, chil_min, kb_max, J_to_umol
+    use MLCanopyVarCtl, only : light_type, leaf_optics_type
+    use MLCanopyVarPar, only : nlevmlcan, isun, isha
     !
     ! !ARGUMENTS:
     implicit none
@@ -286,8 +286,8 @@ contains
     ! Compute solar radiation transfer through canopy using Norman (1979)
     !
     ! !USES:
-    use clm_varpar, only : numrad
-    use MLclm_varpar, only : nlevmlcan, isun, isha
+    use MLCanopyVarPar, only : numrad
+    use MLCanopyVarPar, only : nlevmlcan, isun, isha
     use MLMathToolsMod, only : tridiag
     !
     ! !ARGUMENTS:
@@ -577,8 +577,8 @@ contains
     ! can vary with depth in the canopy.
     !
     ! !USES:
-    use clm_varpar, only : numrad
-    use MLclm_varpar, only : nlevmlcan, isun, isha
+    use MLCanopyVarPar, only : numrad
+    use MLCanopyVarPar, only : nlevmlcan, isun, isha
     !
     ! !ARGUMENTS:
     implicit none

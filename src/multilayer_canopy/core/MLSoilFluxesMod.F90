@@ -5,7 +5,7 @@ module MLSoilFluxesMod
   ! Calculate soil surface temperature and energy balance
   !
   ! !USES:
-  use abortutils, only : endrun
+  use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   !

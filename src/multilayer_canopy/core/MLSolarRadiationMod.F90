@@ -57,23 +57,23 @@ contains
     real(r8) :: gdirj                                    ! Relative projected area of leaf elements in the direction of sky angle
     real(r8) :: wl, ws                                   ! Leaf and stem fraction of canopy layer
 
-    real(r8) :: chil(bounds%begp:bounds%endp,1:nlevmlcan) ! Departure of leaf angle from spherical orientation (-0.4 <= xl <= 0.6)
-    real(r8) :: phi1(bounds%begp:bounds%endp,1:nlevmlcan) ! Term in Ross-Goudriaan function for gdir
-    real(r8) :: phi2(bounds%begp:bounds%endp,1:nlevmlcan) ! Term in Ross-Goudriaan function for gdir
-    real(r8) :: gdir(bounds%begp:bounds%endp,1:nlevmlcan) ! Relative projected area of leaf in the direction of solar beam
+    real(r8) :: chil(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan) ! Departure of leaf angle from spherical orientation (-0.4 <= xl <= 0.6)
+    real(r8) :: phi1(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan) ! Term in Ross-Goudriaan function for gdir
+    real(r8) :: phi2(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan) ! Term in Ross-Goudriaan function for gdir
+    real(r8) :: gdir(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan) ! Relative projected area of leaf in the direction of solar beam
 
-    real(r8) :: clump_fac_ic(bounds%begp:bounds%endp,1:nlevmlcan)    ! Foliage clumping index (-)
+    real(r8) :: clump_fac_ic(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan)    ! Foliage clumping index (-)
 
-    real(r8) :: rho(bounds%begp:bounds%endp,1:nlevmlcan,1:numrad)    ! Leaf/stem reflectance
-    real(r8) :: tau(bounds%begp:bounds%endp,1:nlevmlcan,1:numrad)    ! Leaf/stem transmittance
-    real(r8) :: omega(bounds%begp:bounds%endp,1:nlevmlcan,1:numrad)  ! Leaf/stem scattering coefficient
+    real(r8) :: rho(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)    ! Leaf/stem reflectance
+    real(r8) :: tau(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)    ! Leaf/stem transmittance
+    real(r8) :: omega(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)  ! Leaf/stem scattering coefficient
 
     ! For two-stream radiation
     real(r8) :: asu                                                  ! Single scattering albedo
     real(r8) :: tmp0,tmp1,tmp2                                       ! Intermediate variables
-    real(r8) :: avmu(bounds%begp:bounds%endp,1:nlevmlcan)            ! Average inverse diffuse optical depth per unit leaf area
-    real(r8) :: betad(bounds%begp:bounds%endp,1:nlevmlcan,1:numrad)  ! Upscatter parameter for diffuse radiation
-    real(r8) :: betab(bounds%begp:bounds%endp,1:nlevmlcan,1:numrad)  ! Upscatter parameter for direct beam radiation
+    real(r8) :: avmu(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan)            ! Average inverse diffuse optical depth per unit leaf area
+    real(r8) :: betad(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)  ! Upscatter parameter for diffuse radiation
+    real(r8) :: betab(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)  ! Upscatter parameter for direct beam radiation
     !---------------------------------------------------------------------
 
     associate ( &
@@ -295,9 +295,9 @@ contains
     type(bounds_type), intent(in) :: bounds
     integer , intent(in) :: num_filter                                           ! Number of patches in filter
     integer , intent(in) :: filter(:)                                            ! Patch filter
-    real(r8), intent(in) :: rho(bounds%begp:bounds%endp,1:nlevmlcan,1:numrad)    ! Leaf/stem reflectance
-    real(r8), intent(in) :: tau(bounds%begp:bounds%endp,1:nlevmlcan,1:numrad)    ! Leaf/stem transmittance
-    real(r8), intent(in) :: omega(bounds%begp:bounds%endp,1:nlevmlcan,1:numrad)  ! Leaf/stem scattering coefficient
+    real(r8), intent(in) :: rho(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)    ! Leaf/stem reflectance
+    real(r8), intent(in) :: tau(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)    ! Leaf/stem transmittance
+    real(r8), intent(in) :: omega(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)  ! Leaf/stem scattering coefficient
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
     !
     ! !LOCAL VARIABLES:
@@ -585,11 +585,11 @@ contains
     type(bounds_type), intent(in) :: bounds
     integer,  intent(in) :: num_filter                                        ! Number of patches in filter
     integer,  intent(in) :: filter(:)                                         ! Patch filter
-    real(r8), intent(in) :: omega(bounds%begp:bounds%endp,1:nlevmlcan,numrad) ! Leaf/stem scattering coefficient
-    real(r8), intent(in) :: avmu(bounds%begp:bounds%endp,1:nlevmlcan)         ! Average inverse diffuse optical depth per unit leaf area
-    real(r8), intent(in) :: betad(bounds%begp:bounds%endp,1:nlevmlcan,numrad) ! Upscatter parameter for diffuse radiation
-    real(r8), intent(in) :: betab(bounds%begp:bounds%endp,1:nlevmlcan,numrad) ! Upscatter parameter for direct beam radiation
-    real(r8), intent(in) :: clump_fac_ic(bounds%begp:bounds%endp,1:nlevmlcan) ! Foliage clumping index (-)
+    real(r8), intent(in) :: omega(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad) ! Leaf/stem scattering coefficient
+    real(r8), intent(in) :: avmu(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan)         ! Average inverse diffuse optical depth per unit leaf area
+    real(r8), intent(in) :: betad(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad) ! Upscatter parameter for diffuse radiation
+    real(r8), intent(in) :: betab(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad) ! Upscatter parameter for direct beam radiation
+    real(r8), intent(in) :: clump_fac_ic(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan) ! Foliage clumping index (-)
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
     !
     ! !LOCAL VARIABLES:
@@ -614,24 +614,24 @@ contains
     real(r8), parameter :: unitb = 1._r8                                      ! Unit direct beam radiation (W/m2)
     real(r8), parameter :: unitd = 1._r8                                      ! Unit diffuse radiation (W/m2)
 
-    real(r8) :: iupwb0(bounds%begp:bounds%endp,1:nlevmlcan,numrad)            ! Direct beam flux scattered upward (reflected) above canopy layer (W/m2)
-    real(r8) :: iupwb(bounds%begp:bounds%endp,1:nlevmlcan,numrad)             ! Direct beam flux scattered upward at the canopy layer depth (W/m2)
-    real(r8) :: idwnb(bounds%begp:bounds%endp,1:nlevmlcan,numrad)             ! Direct beam flux scattered downward below canopy layer (W/m2)
-    real(r8) :: iabsb(bounds%begp:bounds%endp,1:nlevmlcan,numrad)             ! Direct beam flux absorbed by canopy layer (W/m2)
-    real(r8) :: iabsbb(bounds%begp:bounds%endp,1:nlevmlcan,numrad)            ! Unscattered component of iabsb (W/m2)
-    real(r8) :: iabsbs(bounds%begp:bounds%endp,1:nlevmlcan,numrad)            ! Scattered component of iabsb (W/m2)
-    real(r8) :: iabsb_sun(bounds%begp:bounds%endp,1:nlevmlcan,numrad)         ! Sunlit component of iabsb (W/m2)
-    real(r8) :: iabsb_sha(bounds%begp:bounds%endp,1:nlevmlcan,numrad)         ! Shaded component of iabsb (W/m2)
+    real(r8) :: iupwb0(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)            ! Direct beam flux scattered upward (reflected) above canopy layer (W/m2)
+    real(r8) :: iupwb(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)             ! Direct beam flux scattered upward at the canopy layer depth (W/m2)
+    real(r8) :: idwnb(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)             ! Direct beam flux scattered downward below canopy layer (W/m2)
+    real(r8) :: iabsb(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)             ! Direct beam flux absorbed by canopy layer (W/m2)
+    real(r8) :: iabsbb(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)            ! Unscattered component of iabsb (W/m2)
+    real(r8) :: iabsbs(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)            ! Scattered component of iabsb (W/m2)
+    real(r8) :: iabsb_sun(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)         ! Sunlit component of iabsb (W/m2)
+    real(r8) :: iabsb_sha(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)         ! Shaded component of iabsb (W/m2)
 
-    real(r8) :: iupwd0(bounds%begp:bounds%endp,1:nlevmlcan,numrad)            ! Diffuse flux scattered upward (reflected) above canopy layer (W/m2)
-    real(r8) :: iupwd(bounds%begp:bounds%endp,1:nlevmlcan,numrad)             ! Diffuse flux scattered upward at the canopy layer depth (W/m2)
-    real(r8) :: idwnd(bounds%begp:bounds%endp,1:nlevmlcan,numrad)             ! Diffuse flux scattered downward below canopy layer (W/m2)
-    real(r8) :: iabsd(bounds%begp:bounds%endp,1:nlevmlcan,numrad)             ! Diffuse flux absorbed by canopy layer (W/m2)
-    real(r8) :: iabsd_sun(bounds%begp:bounds%endp,1:nlevmlcan,numrad)         ! Sunlit component of iabsd (W/m2)
-    real(r8) :: iabsd_sha(bounds%begp:bounds%endp,1:nlevmlcan,numrad)         ! Shaded component of iabsd (W/m2)
+    real(r8) :: iupwd0(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)            ! Diffuse flux scattered upward (reflected) above canopy layer (W/m2)
+    real(r8) :: iupwd(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)             ! Diffuse flux scattered upward at the canopy layer depth (W/m2)
+    real(r8) :: idwnd(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)             ! Diffuse flux scattered downward below canopy layer (W/m2)
+    real(r8) :: iabsd(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)             ! Diffuse flux absorbed by canopy layer (W/m2)
+    real(r8) :: iabsd_sun(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)         ! Sunlit component of iabsd (W/m2)
+    real(r8) :: iabsd_sha(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad)         ! Shaded component of iabsd (W/m2)
 
-    real(r8) :: albb_below(bounds%begp:bounds%endp,numrad)                    ! Direct beam albedo for canopy layer below current layer
-    real(r8) :: albd_below(bounds%begp:bounds%endp,numrad)                    ! Diffuse albedo for canopy layer below current layer
+    real(r8) :: albb_below(mlcanopy_inst%begp:mlcanopy_inst%endp,numrad)                    ! Direct beam albedo for canopy layer below current layer
+    real(r8) :: albd_below(mlcanopy_inst%begp:mlcanopy_inst%endp,numrad)                    ! Diffuse albedo for canopy layer below current layer
     !---------------------------------------------------------------------
 
     associate ( &

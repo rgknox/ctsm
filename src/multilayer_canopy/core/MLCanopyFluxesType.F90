@@ -357,22 +357,23 @@ contains
   end subroutine Init
 
   !-----------------------------------------------------------------------
-  subroutine InitAllocate (this, bounds)
+  subroutine InitAllocate (this)
     !
     ! !DESCRIPTION:
     ! Initialize and allocate module data structure
     !
     ! !ARGUMENTS:
     class(mlcanopy_type) :: this
-    type(bounds_type), intent(in) :: bounds
     !
     ! !LOCAL VARIABLES:
     integer :: begp      ! Beginning patch index for CLM g/l/c/p hierarchy
     integer :: endp      ! Ending patch index for CLM g/l/c/p hierarchy
     !---------------------------------------------------------------------
 
-    begp = bounds%begp ; endp = bounds%endp
+    begp = this%begp ; endp = this%endp
 
+    allocate (this%filter              (begp:endp))                              ; this%filter              (:)       = ispval
+    
     ! Vegetation input variables
 
     allocate (this%ztop_canopy         (begp:endp))                              ; this%ztop_canopy         (:)       = spval
@@ -665,7 +666,7 @@ contains
     integer :: begp, endp
     !---------------------------------------------------------------------
 
-    begp = bounds%begp ; endp= bounds%endp
+    begp = mlcanopy_inst%begp ; endp= mlcanopy_inst%endp
 
     this%gppveg_canopy(begp:endp) = spval
     call hist_addfld1d (fname='GPP_ML', units='umol/m2s', &
@@ -704,7 +705,7 @@ contains
 
     ! Initialize leaf water potential and intercepted water
 
-    do p = bounds%begp, bounds%endp
+    do p = mlcanopy_inst%begp, mlcanopy_inst%endp
        do ic = 1, nlevmlcan
           this%lwp_leaf(p,ic,isun) = -0.1_r8
           this%lwp_leaf(p,ic,isha) = -0.1_r8

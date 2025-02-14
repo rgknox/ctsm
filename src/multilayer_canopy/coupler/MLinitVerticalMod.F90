@@ -61,8 +61,8 @@ contains
     real(r8) :: lai_err, sai_err, pai_err        ! Sum of leaf, stem, or plant area index over all layers (m2/m2)
     real(r8) :: lai_miss, sai_miss               ! Missing leaf (stem) area after imposing dpai_min constraint on layers (m2/m2)
 
-    real(r8) :: dlai(bounds%begp:bounds%endp,1:nlevmlcan)  ! Layer leaf area index (m2/m2)
-    real(r8) :: dsai(bounds%begp:bounds%endp,1:nlevmlcan)  ! Layer stem area index (m2/m2)
+    real(r8) :: dlai(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan)  ! Layer leaf area index (m2/m2)
+    real(r8) :: dsai(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan)  ! Layer stem area index (m2/m2)
 
     real(r8) :: unit_lai = 1.0_r8                          ! Unit leaf area index of canopy (m2/m2)
     real(r8) :: unit_sai = 1.0_r8                          ! Unit stem area index of canopy (m2/m2)

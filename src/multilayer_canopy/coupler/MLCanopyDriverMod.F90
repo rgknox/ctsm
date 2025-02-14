@@ -98,7 +98,7 @@ module MLCanopyDriverMod
     !
     ! !LOCAL VARIABLES:
     integer  :: num_mlcan                               ! Number of vegetated patches for multilayer canopy
-    integer  :: filter_mlcan(bounds%endp-bounds%begp+1) ! Patch filter for multilayer canopy
+    integer  :: filter_mlcan(mlcanopy_inst%endp-mlcanopy_inst%begp+1) ! Patch filter for multilayer canopy
     integer  :: fp                                      ! Filter index
     integer  :: p                                       ! Patch index for CLM g/l/c/p hierarchy
     integer  :: c                                       ! Column index for CLM g/l/c/p hierarchy
@@ -119,9 +119,9 @@ module MLCanopyDriverMod
     ! These are used to accumulate flux variables over the model sub-time step.
     ! The last dimension is the number of variables
 
-    real(r8) :: flux_accumulator(bounds%begp:bounds%endp,nvar1d)                          ! Single-level fluxes
-    real(r8) :: flux_accumulator_profile(bounds%begp:bounds%endp,1:nlevmlcan+1,nvar2d)    ! Multi-level profile fluxes
-    real(r8) :: flux_accumulator_leaf(bounds%begp:bounds%endp,1:nlevmlcan,1:nleaf,nvar3d) ! Multi-level leaf fluxes
+    real(r8) :: flux_accumulator(mlcanopy_inst%begp:mlcanopy_inst%endp,nvar1d)                          ! Single-level fluxes
+    real(r8) :: flux_accumulator_profile(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan+1,nvar2d)    ! Multi-level profile fluxes
+    real(r8) :: flux_accumulator_leaf(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:nleaf,nvar3d) ! Multi-level leaf fluxes
     !---------------------------------------------------------------------
 
     ! Variables used in this subroutine. See README.txt for a complete list of

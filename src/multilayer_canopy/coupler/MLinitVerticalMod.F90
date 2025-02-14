@@ -30,8 +30,8 @@ contains
     ! !USES:
     use PatchType, only : patch
     use pftconMod, only : pftcon
-    use MLclm_varctl, only : dz_tall, dz_short, dz_param, nlayer_above, nlayer_within
-    use MLclm_varpar, only : nlevmlcan
+    use MLCanopyVarCtl, only : dz_tall, dz_short, dz_param, nlayer_above, nlayer_within
+    use MLCanopyVarPar, only : nlevmlcan
     use MLMathToolsMod, only : beta_distribution_cdf
     use CanopyStateType, only : canopystate_type
     use FrictionVelocityMod, only : frictionvel_type
@@ -336,8 +336,8 @@ contains
     !
     ! !USES:
     use PatchType, only : patch
-    use MLclm_varcon, only : mmh2o, mmdry, wind_forc_min
-    use MLclm_varpar, only : isun, isha
+    use MLCanopyVarCon, only : mmh2o, mmdry, wind_forc_min
+    use MLCanopyVarPar, only : isun, isha
     use atm2lndType, only : atm2lnd_type
     use Wateratm2lndBulkType, only : wateratm2lndbulk_type
     use MLCanopyFluxesType, only : mlcanopy_type

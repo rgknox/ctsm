@@ -94,7 +94,7 @@ contains
     use ColumnType, only : col
     use PatchType, only : patch
     use pftconMod, only : pftcon
-    use MLclm_varcon, only : mmh2o
+    use MLCanopyVarCon, only : mmh2o
     use SoilStateType, only : soilstate_type
     use WaterStateBulkType, only : waterstatebulk_type
     use MLCanopyFluxesType, only : mlcanopy_type
@@ -256,7 +256,7 @@ contains
     use clm_varcon, only : denh2o, grav
     use PatchType, only : patch
     use pftconMod, only : pftcon
-    use MLclm_varctl, only : dtime_substep
+    use MLCanopyVarCtl, only : dtime_substep
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:

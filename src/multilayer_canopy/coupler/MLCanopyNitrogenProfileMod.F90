@@ -28,10 +28,10 @@ module MLCanopyNitrogenProfileMod
     use clm_varcon, only : tfrz
     use PatchType, only : patch
     use pftconMod, only : pftcon
-    use MLclm_varcon, only : jmax25_to_vcmax25_noacclim, jmax25_to_vcmax25_acclim
-    use MLclm_varcon, only : rd25_to_vcmax25_c3, rd25_to_vcmax25_c4, kp25_to_vcmax25_c4
-    use MLclm_varctl, only : acclim_type, kn_val, leaf_optics_type
-    use MLclm_varpar, only : isun, isha
+    use MLCanopyVarCon, only : jmax25_to_vcmax25_noacclim, jmax25_to_vcmax25_acclim
+    use MLCanopyVarCon, only : rd25_to_vcmax25_c3, rd25_to_vcmax25_c4, kp25_to_vcmax25_c4
+    use MLCanopyVarCtl, only : acclim_type, kn_val, leaf_optics_type
+    use MLCanopyVarPar, only : isun, isha
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:

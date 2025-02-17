@@ -99,6 +99,7 @@ module MLCanopyDriverMod
     ! !LOCAL VARIABLES:
     integer  :: num_mlcan                               ! Number of vegetated patches for multilayer canopy
     integer  :: filter_mlcan(mlcanopy_inst%endp-mlcanopy_inst%begp+1) ! Patch filter for multilayer canopy
+    integer  :: pft_mlcan(mlcanopy_inst%endp-mlcanopy_inst%begp+1)    ! PFT index for relevant patches
     integer  :: fp                                      ! Filter index
     integer  :: p                                       ! Patch index for CLM g/l/c/p hierarchy
     integer  :: c                                       ! Column index for CLM g/l/c/p hierarchy
@@ -247,6 +248,8 @@ module MLCanopyDriverMod
     ! Build filter of patches to process with multilayer canopy.
     ! For now only process tall canopies > 0.5 m
 
+    pft_mlcan(:) = ispval
+    
     num_mlcan = 0
     do fp = 1, num_exposedvegp
        p = filter_exposedvegp(fp)
@@ -256,6 +259,7 @@ module MLCanopyDriverMod
        if (htop(p) .ge. 0.5) then
           num_mlcan = num_mlcan + 1
           filter_mlcan(num_mlcan) = p
+          pft_mlcan(num_mlcan) = patch%itype(p)
        end if
 !      end if
 !      end if
@@ -432,7 +436,7 @@ module MLCanopyDriverMod
 
     ! Solar radiation transfer through the canopy
 
-    call SolarRadiation (bounds, num_mlcan, filter_mlcan, mlcanopy_inst)
+    call SolarRadiation (num_mlcan, filter_mlcan, mlcanopy_inst, pft_mlcan)
 
     ! Plant hydraulics
 

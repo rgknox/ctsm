@@ -11,6 +11,9 @@ module pftconMod
   use clm_varpar  , only : mxpft, numrad, ivis, inir, cft_lb, cft_ub, ndecomp_pools
   use clm_varctl  , only : iulog, use_cndv, use_crop, use_grainproduct
   use CropReprPoolsMod, only : repr_structure_min, repr_structure_max
+  use MLSolarRadiationMod, only : rad_params
+  use MLSolarRadiationMod, only : AllocateMLSolarParams
+  
   !
   ! !PUBLIC TYPES:
   implicit none
@@ -551,6 +554,11 @@ contains
     allocate (this%pbeta_sai        (0:mxpft))
     allocate (this%qbeta_sai        (0:mxpft))
 
+    
+    if( .not. use_fates ) then
+       call AllocateMLSolarParams(mxpft)
+    end if
+    
   end subroutine InitAllocate
 
   !-----------------------------------------------------------------------
@@ -1550,6 +1558,26 @@ contains
     this%pbeta_sai(1:16) = this%pbeta_lai(1:16)
     this%qbeta_sai(1:16) = this%qbeta_lai(1:16)
 
+   
+    
+    ! Transfer parameters to the ML canopy data structures
+    ! When FATES is coupled with the ML canopy model, it
+    ! will perform its own radiation scattering, so only
+    ! allocated and fill these for non-fates
+    if( .not. use_fates ) then
+       do i = 0, mxpft
+          do j = 1,numrad
+             rad_params%rhol(i,j)    = this%rhol(i,j)
+             rad_params%rhos(i,j)    = this%rhos(i,j) 
+             rad_params%taul(i,j)    = this%taul(i,j)
+             rad_params%taus(i,j)    = this%taus(i,j)
+             rad_params%xl(i)        = this%xl(i)
+             rad_params%clump_fac(i) = this%clump_fac(i)
+          end do
+       end do
+    end if
+       
+    
     if (masterproc) then
        write(iulog,*) 'Successfully read PFT physiological data'
        write(iulog,*)

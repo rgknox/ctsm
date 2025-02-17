@@ -4,12 +4,13 @@ module MLSolarRadiationMod
   ! !DESCRIPTION:
   ! Calculate solar radiation transfer through canopy
   !
+  ! Important Note*  This module assumes a canopy scattering environment
+  !                  is the same PFT for all elements in that patch
+  !
+  !
   ! !USES:
   use MLCanopyVarCtl, only : endrun
   use clm_varctl, only : iulog
-  use decompMod, only : bounds_type
-  use PatchType, only : patch
-  use pftconMod, only : pftcon
   use shr_kind_mod, only : r8 => shr_kind_r8
   use MLCanopyFluxesType, only : mlcanopy_type
   !
@@ -18,16 +19,50 @@ module MLSolarRadiationMod
   !
   ! !PUBLIC MEMBER FUNCTIONS:
   public :: SolarRadiation        ! Main driver for radiative transfer
+  public :: AllocateMLSolarParams
   !
   ! !PRIVATE MEMBER FUNCTIONS:
   private :: Norman               ! Norman radiative transfer
   private :: TwoStream            ! Two-stream approximation
+
   !-----------------------------------------------------------------------
 
+  type, public :: rad_params_type
+     
+     ! From the parameter file
+     real(r8), allocatable :: rhol(:,:)         ! leaf material reflectance:   (pft x band)
+     real(r8), allocatable :: rhos(:,:)         ! stem material reflectance:   (pft x band)
+     real(r8), allocatable :: taul(:,:)         ! leaf material transmittance: (pft x band)
+     real(r8), allocatable :: taus(:,:)         ! stem material transmittance: (pft x band)
+     real(r8), allocatable :: xl(:)             ! leaf/stem orientation (pft)
+     real(r8), allocatable :: clump_fac(:)      ! clumping index 0-1, when
+                                                ! leaves stick together (pft)
+  end type rad_params_type
+
+  type(rad_params_type),public :: rad_params
+  
 contains
 
   !-----------------------------------------------------------------------
-  subroutine SolarRadiation (bounds, num_filter, filter, mlcanopy_inst)
+
+  subroutine AllocateMLSolarParams(n_pft)
+      
+    integer,intent(in) :: n_pft
+    
+    ! Include the zeroth pft index for air
+    
+    allocate(rad_params%rhol(0:n_pft,numrad))
+    allocate(rad_params%rhos(0:n_pft,numrad))
+    allocate(rad_params%taul(0:n_pft,numrad))
+    allocate(rad_params%taus(0:n_pft,numrad))
+    allocate(rad_params%xl(0:n_pft))
+    allocate(rad_params%clump_fac(0:n_pft))
+
+  end subroutine AllocateMLSolarParams
+  
+  !-----------------------------------------------------------------------
+  
+  subroutine SolarRadiation (num_filter, filter, mlcanopy_inst, pft)
     !
     ! !DESCRIPTION:
     ! Solar radiation transfer through canopy
@@ -41,10 +76,11 @@ contains
     !
     ! !ARGUMENTS:
     implicit none
-    type(bounds_type), intent(in) :: bounds
-    integer, intent(in) :: num_filter                    ! Number of patches in filter
-    integer, intent(in) :: filter(:)                     ! Patch filter
+    integer, intent(in) :: num_filter                     ! Number of patches in filter
+    integer, intent(in) :: filter(:)                      ! Patch filter
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
+    integer, intent(in) :: pft(:)                         ! plant functional type associated with the filter index (patch)
+    
     !
     ! !LOCAL VARIABLES:
     integer  :: fp                                       ! Filter index
@@ -78,12 +114,6 @@ contains
 
     associate ( &
                                                         ! *** Input ***
-    xl          => pftcon%xl                       , &  ! CLM: Departure of leaf angle from spherical orientation (-)
-    rhol        => pftcon%rhol                     , &  ! CLM: Leaf reflectance (-)
-    taul        => pftcon%taul                     , &  ! CLM: Leaf transmittance (-)
-    rhos        => pftcon%rhos                     , &  ! CLM: Stem reflectance (-)
-    taus        => pftcon%taus                     , &  ! CLM: Stem transmittance (-)
-    clump_fac   => pftcon%clump_fac                , &  ! CLMml: Foliage clumping index (-)
     solar_zen   => mlcanopy_inst%solar_zen_forcing , &  ! Solar zenith angle (radians)
     ncan        => mlcanopy_inst%ncan_canopy       , &  ! Number of aboveground layers
     ntop        => mlcanopy_inst%ntop_canopy       , &  ! Index for top leaf layer
@@ -144,9 +174,9 @@ contains
           do ib = 1, numrad
              select case (leaf_optics_type)
              case (0)
-                rho(p,ic,ib) = max(rhol(patch%itype(p),ib)*wl + rhos(patch%itype(p),ib)*ws, 1.e-06_r8)
-                tau(p,ic,ib) = max(taul(patch%itype(p),ib)*wl + taus(patch%itype(p),ib)*ws, 1.e-06_r8)
-             case (1)
+                 rho(p,ic,ib) = max(rad_params%rhol(pft(fp),ib)*wl + rad_params%rhos(pft(fp),ib)*ws, 1.e-06_r8)
+                 tau(p,ic,ib) = max(rad_params%taul(pft(fp),ib)*wl + rad_params%taus(pft(fp),ib)*ws, 1.e-06_r8)
+              case (1)
                 call endrun (msg=' ERROR: SolarRadiation: need to specify vertical profile for rho & tau')
              end select
              omega(p,ic,ib) = rho(p,ic,ib) + tau(p,ic,ib)
@@ -156,7 +186,7 @@ contains
 
           select case (leaf_optics_type)
           case (0)
-             chil(p,ic) = xl(patch%itype(p))
+             chil(p,ic) = rad_params%xl(pft(fp))
           case (1)
              call endrun (msg=' ERROR: SolarRadiation: need to specify vertical profile for chil')
           end select
@@ -181,7 +211,7 @@ contains
 
           select case (leaf_optics_type)
           case (0)
-             clump_fac_ic(p,ic) = clump_fac(patch%itype(p))
+             clump_fac_ic(p,ic) = rad_params%clump_fac(pft(fp))
           case (1)
              call endrun (msg=' ERROR: SolarRadiation: need to specify vertical profile for clump_fac')
           end select
@@ -259,9 +289,9 @@ contains
 
     select case (light_type)
     case (1)
-       call Norman (bounds, num_filter, filter, rho, tau, omega, mlcanopy_inst)
+       call Norman (num_filter, filter, rho, tau, omega, mlcanopy_inst)
     case (2)
-       call TwoStream (bounds, num_filter, filter, omega, avmu, betad, betab, clump_fac_ic, mlcanopy_inst)
+       call TwoStream (num_filter, filter, omega, avmu, betad, betab, clump_fac_ic, mlcanopy_inst)
     case default
        call endrun (msg=' ERROR: SolarRadiation: light_type not valid')
     end select
@@ -280,7 +310,7 @@ contains
   end subroutine SolarRadiation
 
   !-----------------------------------------------------------------------
-  subroutine Norman (bounds, num_filter, filter, rho, tau, omega, mlcanopy_inst)
+  subroutine Norman (num_filter, filter, rho, tau, omega, mlcanopy_inst)
     !
     ! !DESCRIPTION:
     ! Compute solar radiation transfer through canopy using Norman (1979)
@@ -292,7 +322,6 @@ contains
     !
     ! !ARGUMENTS:
     implicit none
-    type(bounds_type), intent(in) :: bounds
     integer , intent(in) :: num_filter                                           ! Number of patches in filter
     integer , intent(in) :: filter(:)                                            ! Patch filter
     real(r8), intent(in) :: rho(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)    ! Leaf/stem reflectance
@@ -568,7 +597,7 @@ contains
   end subroutine Norman
 
   !-----------------------------------------------------------------------
-  subroutine TwoStream (bounds, num_filter, filter, omega, avmu, betad, betab, clump_fac_ic, mlcanopy_inst)
+  subroutine TwoStream (num_filter, filter, omega, avmu, betad, betab, clump_fac_ic, mlcanopy_inst)
     !
     ! !DESCRIPTION:
     ! Compute solar radiation transfer through canopy using the two-stream
@@ -582,7 +611,6 @@ contains
     !
     ! !ARGUMENTS:
     implicit none
-    type(bounds_type), intent(in) :: bounds
     integer,  intent(in) :: num_filter                                        ! Number of patches in filter
     integer,  intent(in) :: filter(:)                                         ! Patch filter
     real(r8), intent(in) :: omega(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad) ! Leaf/stem scattering coefficient

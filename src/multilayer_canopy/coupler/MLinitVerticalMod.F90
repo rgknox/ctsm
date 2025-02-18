@@ -89,7 +89,8 @@ contains
     zs          => mlcanopy_inst%zs_profile          , &  ! Canopy layer height for scalar concentration and source (m)
     zw          => mlcanopy_inst%zw_profile          , &  ! Canopy height at interface between two adjacent layers (m)
     dz          => mlcanopy_inst%dz_profile          , &  ! Canopy layer thickness (m)
-    dleaf_prof  => mlcanopy_inst%dleaf_profile         &  ! Mean leaf width over canopy (constant value, set to pftcon)
+    dleaf_prof  => mlcanopy_inst%dleaf_profile       , &  ! Mean leaf width over canopy (constant value, set to pftcon)
+    emleaf_prof => mlcanopy_inst%emleaf_profile        &  ! Mean leaf LW emissivity over canopy layers
     )
 
     do fp = 1, num_filter
@@ -331,6 +332,12 @@ contains
 
        do ic = 1, ncan(p)
           dleaf_prof(p,ic) = pftcon%dleaf(patch%itype(p))
+       end do
+
+       ! Assign the pft's LW emissivity to the pft x layer
+       
+       do ic = 1, ncan(p)
+          emleaf_prof(p,ic) = pftcon%emleaf(patch%itype(p))
        end do
        
     end do

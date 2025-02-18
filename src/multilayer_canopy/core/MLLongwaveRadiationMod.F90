@@ -55,8 +55,6 @@ contains
     !
     ! !USES:
     use MLCanopyVarCon, only : sb
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLCanopyVarCon, only : emg
     use MLCanopyVarPar, only : isun, isha, nlevmlcan
     use MLMathToolsMod, only : tridiag
@@ -95,13 +93,13 @@ contains
 
     associate ( &
                                                    ! *** Input ***
-    emleaf   => pftcon%emleaf                 , &  ! CLMml: Leaf emissivity (-)
     lwsky    => mlcanopy_inst%lwsky_forcing   , &  ! Atmospheric longwave radiation (W/m2)
     ncan     => mlcanopy_inst%ncan_canopy     , &  ! Number of aboveground layers
     ntop     => mlcanopy_inst%ntop_canopy     , &  ! Index for top leaf layer
     nbot     => mlcanopy_inst%nbot_canopy     , &  ! Index for bottom leaf layer
     tg       => mlcanopy_inst%tg_soil         , &  ! Soil surface temperature (K)
     dpai     => mlcanopy_inst%dpai_profile    , &  ! Canopy layer plant area index (m2/m2)
+    emleaf   => mlcanopy_inst%emleaf_profile  , &  ! Mean leaf LW emissivity by layer
     fracsun  => mlcanopy_inst%fracsun_profile , &  ! Canopy layer sunlit fraction (-)
     td       => mlcanopy_inst%td_profile      , &  ! Canopy layer transmittance of diffuse radiation (-)
     tleaf    => mlcanopy_inst%tleaf_leaf      , &  ! Leaf temperature (K)
@@ -129,21 +127,11 @@ contains
           lwleaf(p,ic,isha) = 0._r8
        end do
 
-       ! Leaf scattering coefficient
-
-       omega = 1._r8 - emleaf(patch%itype(p))
-
-       ! Terms for longwave radiation reflected and transmitted by a layer:
-       ! intercepted radiation is reflected
-
-       rho = omega 
-       tau = 0._r8
-
        ! Emitted longwave radiation is weighted average of sunlit and shaded leaves
 
        do ic = nbot(p), ntop(p)
-          lw_source_sun = emleaf(patch%itype(p)) * sb * tleaf(p,ic,isun)**4
-          lw_source_sha = emleaf(patch%itype(p)) * sb * tleaf(p,ic,isha)**4
+          lw_source_sun = emleaf(p,ic) * sb * tleaf(p,ic,isun)**4
+          lw_source_sha = emleaf(p,ic) * sb * tleaf(p,ic,isha)**4
           lw_source(ic) = (lw_source_sun * fracsun(p,ic) + lw_source_sha * (1._r8 - fracsun(p,ic))) &
                         * (1._r8 - td(p,ic))
        end do
@@ -164,7 +152,15 @@ contains
        dtri(m) = emg * sb * tg(p)**4
 
        ! Soil: downward flux
+       tau = 0._r8
 
+       ! Leaf scattering coefficient
+       omega = 1._r8 - emleaf(p,nbot(p))
+       
+       ! Terms for longwave radiation reflected and transmitted by a layer:
+       ! intercepted radiation is reflected
+       rho = omega
+       
        refld = (1._r8 - td(p,nbot(p))) * rho
        trand = (1._r8 - td(p,nbot(p))) * tau + td(p,nbot(p))
        aic = refld - trand * trand / refld
@@ -278,7 +274,7 @@ contains
           else
              icm1 = ic - 1
           end if
-          lwabs = emleaf(patch%itype(p)) * (lwdwn(p,ic)+lwupw(p,icm1)) * (1._r8 - td(p,ic)) &
+          lwabs = emleaf(p,ic) * (lwdwn(p,ic)+lwupw(p,icm1)) * (1._r8 - td(p,ic)) &
                 - 2._r8 * lw_source(ic)
           lwleaf(p,ic, isun) = lwabs / dpai(p,ic)
           lwleaf(p,ic, isha) = lwabs / dpai(p,ic)

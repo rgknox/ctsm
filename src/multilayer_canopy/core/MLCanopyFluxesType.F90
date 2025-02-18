@@ -225,7 +225,8 @@ module MLCanopyFluxesType
     real(r8), pointer :: swdwn_profile(:,:,:)    ! Downward diffuse solar flux above canopy layer (W/m2) [for numrad wavebands]
     real(r8), pointer :: lwupw_profile(:,:)      ! Upward longwave flux above canopy layer (W/m2)
     real(r8), pointer :: lwdwn_profile(:,:)      ! Downward longwave flux above canopy layer (W/m2)
-
+    real(r8), pointer :: emleaf_profile(:,:)     ! Mean LW emissivity of leaves in each canopy layer
+    
     real(r8), pointer :: swsrc_profile(:,:,:)    ! Canopy layer source/sink flux: absorbed solar radiation (W/m2) [for numrad wavebands]
     real(r8), pointer :: lwsrc_profile(:,:)      ! Canopy layer source/sink flux: absorbed longwave radiation (W/m2)
     real(r8), pointer :: rnsrc_profile(:,:)      ! Canopy layer source/sink flux: net radiation (W/m2)
@@ -547,7 +548,8 @@ contains
     allocate (this%swdwn_profile       (begp:endp,0:nlevmlcan,1:numrad))         ; this%swdwn_profile       (:,:,:)   = spval
     allocate (this%lwupw_profile       (begp:endp,0:nlevmlcan))                  ; this%lwupw_profile       (:,:)     = spval
     allocate (this%lwdwn_profile       (begp:endp,0:nlevmlcan))                  ; this%lwdwn_profile       (:,:)     = spval
-
+    allocate (this%emleaf_profile       (begp:endp,0:nlevmlcan))                 ; this%emleaf_profile       (:,:)    = spval
+    
     allocate (this%swsrc_profile       (begp:endp,1:nlevmlcan,1:numrad))         ; this%swsrc_profile       (:,:,:)   = spval
     allocate (this%lwsrc_profile       (begp:endp,1:nlevmlcan))                  ; this%lwsrc_profile       (:,:)     = spval
     allocate (this%rnsrc_profile       (begp:endp,1:nlevmlcan))                  ; this%rnsrc_profile       (:,:)     = spval

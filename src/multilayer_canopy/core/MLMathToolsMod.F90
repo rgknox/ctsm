@@ -40,7 +40,7 @@ module MLMathToolsMod
 contains
 
   !-----------------------------------------------------------------------
-  function hybrid (msg, p, ic, il, mlcanopy_inst, func, xa, xb, tol) result(root)
+  function hybrid (msg, p, ic, il, ipft, mlcanopy_inst, func, xa, xb, tol) result(root)
     !
     ! !DESCRIPTION:
     ! Solve for the root of a function given initial estimates xa and xb.
@@ -55,6 +55,7 @@ contains
     integer, intent(in) :: p          ! Patch index for CLM g/l/c/p hierarchy
     integer, intent(in) :: ic         ! Canopy layer index
     integer, intent(in) :: il         ! Sunlit (1) or shaded (2) leaf index
+    integer, intent(in) :: ipft       ! Plant functional type index
     real(r8), intent(in) :: xa, xb    ! Initial estimates of root
     real(r8), intent(in) :: tol       ! Error tolerance
     external :: func                  ! Function to solve
@@ -73,14 +74,14 @@ contains
     !---------------------------------------------------------------------
 
     x0 = xa
-    call func (p, ic, il, mlcanopy_inst, x0, f0)
+    call func (p, ic, il, ipft, mlcanopy_inst, x0, f0)
     if (f0 == 0._r8) then
        root = x0
        return
     end if
 
     x1 = xb
-    call func (p, ic, il, mlcanopy_inst, x1, f1)
+    call func (p, ic, il, ipft, mlcanopy_inst, x1, f1)
     if (f1 == 0._r8) then
        root = x1
        return
@@ -108,7 +109,7 @@ contains
        x0 = x1
        f0 = f1
        x1 = x
-       call func (p, ic, il, mlcanopy_inst, x1, f1)
+       call func (p, ic, il, ipft, mlcanopy_inst, x1, f1)
        if (f1 < minf) then
           minx = x1
           minf = f1
@@ -117,7 +118,7 @@ contains
        ! If a root zone is found, use the brent method for a robust backup strategy
 
        if (f1 * f0 < 0._r8) then
-          x = zbrent (msg, p, ic, il, mlcanopy_inst, func, x0, x1, tol)
+          x = zbrent (msg, p, ic, il, ipft, mlcanopy_inst, func, x0, x1, tol)
           x0 = x
           exit
        end if
@@ -125,7 +126,7 @@ contains
        ! In case of failing to converge within itmax iterations stop at the minimum function
 
        if (iter > itmax) then
-          call func (p, ic, il, mlcanopy_inst, minx, f1)
+          call func (p, ic, il, ipft, mlcanopy_inst, minx, f1)
           x0 = minx
           exit
        end if
@@ -137,7 +138,7 @@ contains
   end function hybrid
 
   !-----------------------------------------------------------------------
-  function zbrent (msg, p, ic, il, mlcanopy_inst, func, xa, xb, tol) result(root)
+  function zbrent (msg, p, ic, il, ipft, mlcanopy_inst, func, xa, xb, tol) result(root)
     !
     ! !DESCRIPTION:
     ! Use Brent's method to find the root of a function, which is known to exist
@@ -151,6 +152,7 @@ contains
     integer, intent(in) :: p          ! Patch index for CLM g/l/c/p hierarchy
     integer, intent(in) :: ic         ! Canopy layer index
     integer, intent(in) :: il         ! Sunlit (1) or shaded (2) leaf index
+    integer, intent(in) :: ipft       ! Plant functional type index
     real(r8), intent(in) :: xa, xb    ! Minimum and maximum of the variable domain to search
     real(r8), intent(in) :: tol       ! Error tolerance
     external :: func                  ! Function to solve
@@ -167,8 +169,8 @@ contains
 
     a = xa
     b = xb
-    call func (p, ic, il, mlcanopy_inst, a, fa)
-    call func (p, ic, il, mlcanopy_inst, b, fb)
+    call func (p, ic, il, ipft, mlcanopy_inst, a, fa)
+    call func (p, ic, il, ipft, mlcanopy_inst, b, fb)
 
     if ((fa > 0._r8 .and. fb > 0._r8) .or. (fa < 0._r8 .and. fb < 0._r8)) then
        write (iulog,*) 'zbrent: Root must be bracketed'
@@ -231,7 +233,7 @@ contains
        else
           b = b + sign(tol1,xm)
        end if
-       call func (p, ic, il, mlcanopy_inst, b, fb)
+       call func (p, ic, il, ipft, mlcanopy_inst, b, fb)
        if (fb == 0._r8) exit
     end do
     root = b
@@ -245,7 +247,7 @@ contains
   end function zbrent
 
   !-----------------------------------------------------------------------
-  function bisection (msg, p, ic, il, mlcanopy_inst, func, xa, xb, tol) result(root)
+  function bisection (msg, p, ic, il, ipft, mlcanopy_inst, func, xa, xb, tol) result(root)
     !
     ! !DESCRIPTION:
     ! Use bisection to find the root of a function, which is known to exist
@@ -259,6 +261,7 @@ contains
     integer, intent(in) :: p          ! Patch index for CLM g/l/c/p hierarchy
     integer, intent(in) :: ic         ! Canopy layer index
     integer, intent(in) :: il         ! Sunlit (1) or shaded (2) leaf index
+    integer, intent(in) :: ipft       ! plant functional type index
     real(r8), intent(in) :: xa, xb    ! Minimum and maximum of the variable domain to search
     real(r8), intent(in) :: tol       ! Error tolerance
     external :: func                  ! Function to solve
@@ -274,8 +277,8 @@ contains
 
     a = xa
     b = xb
-    call func (p, ic, il, mlcanopy_inst, a, fa)
-    call func (p, ic, il, mlcanopy_inst, b, fb)
+    call func (p, ic, il, ipft, mlcanopy_inst, a, fa)
+    call func (p, ic, il, ipft, mlcanopy_inst, b, fb)
 
     if (fa * fb > 0._r8) then
        write (iulog,*) 'bisection error: Root must be bracketed'
@@ -288,7 +291,7 @@ contains
     iter = 1
     do while (abs(b-a) > tol .and. iter <= itmax)
        c = (a + b) / 2._r8
-       call func (p, ic, il, mlcanopy_inst, c, fc)
+       call func (p, ic, il, ipft, mlcanopy_inst, c, fc)
        if (fa * fc < 0._r8) then
           b = c; fb = fc
        else

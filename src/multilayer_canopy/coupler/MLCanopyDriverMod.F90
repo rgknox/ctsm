@@ -497,8 +497,8 @@ module MLCanopyDriverMod
 
        ! Photosynthesis and stomatal conductance
 
-       call LeafPhotosynthesis (num_mlcan, filter_mlcan, isun, mlcanopy_inst)
-       call LeafPhotosynthesis (num_mlcan, filter_mlcan, isha, mlcanopy_inst)
+       call LeafPhotosynthesis (num_mlcan, filter_mlcan, isun, mlcanopy_inst, pft_mlcan)
+       call LeafPhotosynthesis (num_mlcan, filter_mlcan, isha, mlcanopy_inst, pft_mlcan)
 
        ! Relative humidity in soil airspace
 

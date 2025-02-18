@@ -14,6 +14,7 @@ module MLLeafPhotosynthesisMod
   !
   ! !PUBLIC MEMBER FUNCTIONS:
   public :: LeafPhotosynthesis       ! Leaf photosynthesis and stomatal conductance
+  public :: AllocateMLPhotoParams    ! Allocate parameter constant arrays
   !
   ! !PRIVATE MEMBER FUNCTIONS:
   private :: ft                      ! Photosynthesis temperature response
@@ -25,9 +26,42 @@ module MLLeafPhotosynthesisMod
   private :: StomataEfficiency       ! Water-use efficiency check for optimal gs
   private :: C13Fractionation        ! 13C fractionation for photosynthesis
   !-----------------------------------------------------------------------
-
+  
+  
+  type, public :: photo_params_type
+     integer(r8), allocatable :: c3psn(:)     ! Photosynthetic pathway (1 = C3 plant, 0 = C4 plant)
+     real(r8), allocatable :: g0_BB(:)     ! Ball-Berry minimum leaf conductance (mol H2O/m2/s)
+     real(r8), allocatable :: g1_BB(:)     ! Ball-Berry slope of conductance-photosynthesis relationship
+     real(r8), allocatable :: g0_MED(:)    ! Medlyn minimum leaf conductance (mol H2O/m2/s)
+     real(r8), allocatable :: g1_MED(:)    ! Medlyn slope of conductance-photosynthesis relationship
+     real(r8), allocatable :: psi50_gs(:)  ! Leaf water potential at which 50% of stomatal conductance is lost (MPa)
+     real(r8), allocatable :: shape_gs(:)  ! Shape parameter for stomatal conductance in relation to leaf water potential (-)
+     real(r8), allocatable :: gsmin_SPA(:) ! Minimum stomatal conductance (mol H2O/m2/s)
+     real(r8), allocatable :: iota_SPA(:)  ! Stomatal water-use efficiency (umol CO2/ mol H2O)
+  end type photo_params_type
+  
+  type(photo_params_type),public :: photo_params
+  
 contains
 
+
+  subroutine AllocateMLPhotoParams(n_pft)
+      
+    integer,intent(in) :: n_pft
+    
+    allocate(photo_params%c3psn(0:n_pft)) 
+    allocate(photo_params%g0_BB(0:n_pft))
+    allocate(photo_params%g1_BB(0:n_pft))
+    allocate(photo_params%g0_MED(0:n_pft))
+    allocate(photo_params%g1_MED(0:n_pft))
+    allocate(photo_params%psi50_ps(0:n_pft))
+    allocate(photo_params%shape_gs(0:n_pft))
+    allocate(photo_params%gsmin_SPA(0:n_pft))
+    allocate(photo_params%ioto_SPA(0:n_pft))
+    
+
+  end subroutine AllocateMLPhotoParams
+  
   !-----------------------------------------------------------------------
   function ft (tl, ha) result(ans)
     !
@@ -99,15 +133,13 @@ contains
   end function fth25
 
   !-----------------------------------------------------------------------
-  subroutine LeafPhotosynthesis (num_filter, filter, il, mlcanopy_inst)
+  subroutine LeafPhotosynthesis (num_filter, filter, il, mlcanopy_inst, pft)
     !
     ! !DESCRIPTION:
     ! Leaf photosynthesis and stomatal conductance
     !
     ! !USES:
     use MLCanopyVarCon, only : tfrz
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLCanopyVarCon, only: kc25, ko25, cp25, kcha, koha, cpha
     use MLCanopyVarCon, only: vcmaxha_noacclim, vcmaxha_acclim, jmaxha_noacclim, jmaxha_acclim
     use MLCanopyVarCon, only: vcmaxhd_noacclim, vcmaxhd_acclim, jmaxhd_noacclim, jmaxhd_acclim
@@ -126,6 +158,8 @@ contains
     integer, intent(in) :: filter(:)    ! Patch filter
     integer, intent(in) :: il           ! Sunlit (1) or shaded (2) leaf index
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
+    integer, intent(in) :: pft(:)       ! pft indices of the patches (filter indexing)
+    
     !
     ! !LOCAL VARIABLES:
     integer  :: fp                      ! Filter index
@@ -156,14 +190,14 @@ contains
 
     associate ( &
                                                     ! *** Input ***
-    c3psn     => pftcon%c3psn                  , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
-    g0_BB     => pftcon%g0_BB                  , &  ! CLMml: Ball-Berry minimum leaf conductance (mol H2O/m2/s)
-    g1_BB     => pftcon%g1_BB                  , &  ! CLMml: Ball-Berry slope of conductance-photosynthesis relationship
-    g0_MED    => pftcon%g0_MED                 , &  ! CLMml: Medlyn minimum leaf conductance (mol H2O/m2/s)
-    g1_MED    => pftcon%g1_MED                 , &  ! CLMml: Medlyn slope of conductance-photosynthesis relationship
-    psi50_gs  => pftcon%psi50_gs               , &  ! CLMml: Leaf water potential at which 50% of stomatal conductance is lost (MPa)
-    shape_gs  => pftcon%shape_gs               , &  ! CLMml: Shape parameter for stomatal conductance in relation to leaf water potential (-)
-    gsmin_SPA => pftcon%gsmin_SPA              , &  ! CLMml: Minimum stomatal conductance (mol H2O/m2/s)
+    c3psn     => photo_params%c3psn                  , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
+    g0_BB     => photo_params%g0_BB                  , &  ! CLMml: Ball-Berry minimum leaf conductance (mol H2O/m2/s)
+    g1_BB     => photo_params%g1_BB                  , &  ! CLMml: Ball-Berry slope of conductance-photosynthesis relationship
+    g0_MED    => photo_params%g0_MED                 , &  ! CLMml: Medlyn minimum leaf conductance (mol H2O/m2/s)
+    g1_MED    => photo_params%g1_MED                 , &  ! CLMml: Medlyn slope of conductance-photosynthesis relationship
+    psi50_gs  => photo_params%psi50_gs               , &  ! CLMml: Leaf water potential at which 50% of stomatal conductance is lost (MPa)
+    shape_gs  => photo_params%shape_gs               , &  ! CLMml: Shape parameter for stomatal conductance in relation to leaf water potential (-)
+    gsmin_SPA => photo_params%gsmin_SPA              , &  ! CLMml: Minimum stomatal conductance (mol H2O/m2/s)
     tacclim   => mlcanopy_inst%tacclim_forcing , &  ! Average air temperature for acclimation (K)
     ncan      => mlcanopy_inst%ncan_canopy     , &  ! Number of aboveground layers
     dpai      => mlcanopy_inst%dpai_profile    , &  ! Canopy layer plant area index (m2/m2)
@@ -259,7 +293,7 @@ contains
 
              ! C4 photosynthetic temperature response
 
-             if (nint(c3psn(patch%itype(p))) == 0) then
+             if (nint(c3psn(pft(fp))) == 0) then
                 t1 = 2.0**( (tleaf(p,ic,il)-(tfrz+25._r8)) / 10._r8 ) 
                 t2 = 1._r8 + exp(0.2_r8*((tfrz+15._r8)-tleaf(p,ic,il))) 
                 t3 = 1._r8 + exp(0.3_r8*(tleaf(p,ic,il)-(tfrz+40._r8)))
@@ -280,12 +314,12 @@ contains
              select case (gs_type)
              case (0)
                 ! Medlyn conductance
-                g0(p) = g0_MED(patch%itype(p))
-                g1(p) = g1_MED(patch%itype(p))
+                g0(p) = g0_MED(pft(fp))
+                g1(p) = g1_MED(pft(fp))
              case (1)
                 ! Ball-Berry conductance
-                g0(p) = g0_BB(patch%itype(p))
-                g1(p) = g1_BB(patch%itype(p))
+                g0(p) = g0_BB(pft(fp))
+                g1(p) = g1_BB(pft(fp))
              case default
                 g0(p) = -999._r8
                 g1(p) = -999._r8
@@ -324,9 +358,9 @@ contains
 
                 ! Ball-Berry or Medlyn conductance
 
-                if (nint(c3psn(patch%itype(p))) == 1) then
+                if (nint(c3psn(pft(fp))) == 1) then
                    ci0 = 0.7_r8 * cair(p,ic)
-                else if (nint(c3psn(patch%itype(p))) == 0) then
+                else if (nint(c3psn(pft(fp))) == 0) then
                    ci0 = 0.4_r8 * cair(p,ic)
                 end if
                 ci1 = ci0 * 0.99_r8
@@ -334,13 +368,13 @@ contains
                 ! Solve for Ci: Use CiFunc to iterate photosynthesis calculations
                 ! until the change in Ci is < tol. Ci has units umol/mol
 
-                ci(p,ic,il) = hybrid ('LeafPhotosynthesis', p, ic, il, mlcanopy_inst, CiFunc, ci0, ci1, tol)
+                ci(p,ic,il) = hybrid ('LeafPhotosynthesis', p, ic, il, pft(fp), mlcanopy_inst, CiFunc, ci0, ci1, tol)
 
              case (2)
 
                 ! Use water-use efficiency optimization
 
-                call StomataOptimization (p, ic, il, mlcanopy_inst)
+                call StomataOptimization (p, ic, il, pft(fp), mlcanopy_inst)
 
              case default
                 call endrun (msg=' ERROR: LeafPhotosynthesis: gs_type not valid')
@@ -396,9 +430,9 @@ contains
              rd(p,ic,il) = 0._r8
              select case (gs_type)
              case (0, 1)
-                call CiFunc (p, ic, il, mlcanopy_inst, 0._r8, ci(p,ic,il))
+                call CiFunc (p, ic, il, pft(fp), mlcanopy_inst, 0._r8, ci(p,ic,il))
              case (2)
-                call CiFuncGs (p, ic, il, mlcanopy_inst, ci(p,ic,il))
+                call CiFuncGs (p, ic, il, pft(fp), mlcanopy_inst, ci(p,ic,il))
              case default
                 call endrun (msg=' ERROR: LeafPhotosynthesis: gs_type not valid')
              end select
@@ -428,13 +462,13 @@ contains
              case (0)
                 fpsi = 1._r8
              case (1)
-                fpsi = 1._r8 / (1._r8 + (lwp(p,ic,il)/psi50_gs(patch%itype(p)))**shape_gs(patch%itype(p)))
+                fpsi = 1._r8 / (1._r8 + (lwp(p,ic,il)/psi50_gs(pft(fp)))**shape_gs(pft(fp)))
              end select
-             gs(p,ic,il) = max(gspot(p,ic,il)*fpsi, gsmin_SPA(patch%itype(p)))
+             gs(p,ic,il) = max(gspot(p,ic,il)*fpsi, gsmin_SPA(pft(fp)))
 
              ! Recalculate photosynthesis for this value of gs
 
-             call CiFuncGs (p, ic, il, mlcanopy_inst, ci(p,ic,il))
+             call CiFuncGs (p, ic, il, pft(fp), mlcanopy_inst, ci(p,ic,il))
 
              ! Relative humidity and vapor pressure at leaf surface
 
@@ -457,7 +491,7 @@ contains
     do fp = 1, num_filter
        p = filter(fp)
        do ic = 1, ncan(p)
-          call C13Fractionation (p, ic, il, mlcanopy_inst)
+          call C13Fractionation (p, ic, il, pft(fp), mlcanopy_inst)
        end do
     end do
 
@@ -465,7 +499,7 @@ contains
   end subroutine LeafPhotosynthesis
 
   !-----------------------------------------------------------------------
-  subroutine CiFunc (p, ic, il, mlcanopy_inst, ci_val, ci_dif)
+  subroutine CiFunc (p, ic, il, ipft, mlcanopy_inst, ci_val, ci_dif)
     !
     ! !DESCRIPTION:
     ! Calculate leaf photosynthesis and stomatal conductance for a specified Ci
@@ -474,8 +508,6 @@ contains
     ! satisfies the metabolic, stomatal constraint, and diffusion equations.
     !
     ! !USES:
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLCanopyVarCon, only : qe_c4, vpd_min_MED, colim_c3a, colim_c4a, colim_c4b, dh2o_to_dco2
     use MLCanopyVarCtl, only : colim_type, gs_type
     use MLMathToolsMod, only : quadratic
@@ -489,6 +521,7 @@ contains
     real(r8), intent(in) :: ci_val  ! Input value for Ci (umol/mol)
     real(r8), intent(out) :: ci_dif ! Difference in Ci
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
+    integer, intent(in) :: ipft     ! PFT index of the current patch
     !
     ! !LOCAL VARIABLES:
     real(r8) :: aquad,bquad,cquad   ! Terms for quadratic equations
@@ -502,7 +535,7 @@ contains
 
     associate ( &
                                                   ! *** Input ***
-    c3psn     => pftcon%c3psn                , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
+    c3psn     => photo_params%c3psn                , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
     o2ref     => mlcanopy_inst%o2ref_forcing , &  ! Atmospheric O2 at reference height (mmol/mol)
     g0        => mlcanopy_inst%g0_canopy     , &  ! Ball-Berry or Medlyn minimum leaf conductance (mol H2O/m2/s)
     g1        => mlcanopy_inst%g1_canopy     , &  ! Ball-Berry or Medlyn slope parameter
@@ -534,7 +567,7 @@ contains
 
        ! First calculate the metabolic (demand-based) photosynthetic rate
 
-       if (nint(c3psn(patch%itype(p))) == 1) then
+       if (nint(c3psn(ipft)) == 1) then
 
           ! C3: Rubisco-limited photosynthesis
           ac(p,ic,il) = vcmax(p,ic,il) * max(ci_val-cp(p,ic,il),0._r8) / (ci_val + kc(p,ic,il)*(1._r8 + o2ref(p)/ko(p,ic,il)))
@@ -545,7 +578,7 @@ contains
           ! C3: Product-limited photosynthesis
           ap(p,ic,il) = 0._r8
 
-       else if (nint(c3psn(patch%itype(p))) == 0) then
+       else if (nint(c3psn(ipft)) == 0) then
 
           ! C4: Rubisco-limited photosynthesis
           ac(p,ic,il) = vcmax(p,ic,il)
@@ -565,10 +598,10 @@ contains
 
           ! No co-limitation - use minimum rate
 
-          if (nint(c3psn(patch%itype(p))) == 1) then
+          if (nint(c3psn(ipft)) == 1) then
              ! No product-limited photosynthesis for C3
              agross(p,ic,il) = min(ac(p,ic,il), aj(p,ic,il))
-          else if (nint(c3psn(patch%itype(p))) == 0) then
+          else if (nint(c3psn(ipft)) == 0) then
              ! Include PEP carboxylase-limited photosynthesis for C4
              agross(p,ic,il) = min(ac(p,ic,il), aj(p,ic,il), ap(p,ic,il))
           end if
@@ -577,9 +610,9 @@ contains
 
           ! First co-limit Ac and Aj
 
-          if (nint(c3psn(patch%itype(p))) == 1) then
+          if (nint(c3psn(ipft)) == 1) then
              aquad = colim_c3a
-          else if (nint(c3psn(patch%itype(p))) == 0) then
+          else if (nint(c3psn(ipft)) == 0) then
              aquad = colim_c4a
           end if
           bquad = -(ac(p,ic,il) + aj(p,ic,il))
@@ -589,9 +622,9 @@ contains
 
           ! Now co-limit again using Ap, but only for C4 plants
 
-          if (nint(c3psn(patch%itype(p))) == 1) then
+          if (nint(c3psn(ipft)) == 1) then
              agross(p,ic,il) = ai
-          else if (nint(c3psn(patch%itype(p))) == 0) then
+          else if (nint(c3psn(ipft)) == 0) then
              aquad = colim_c4b
              bquad = -(ai + ap(p,ic,il))
              cquad = ai * ap(p,ic,il)
@@ -688,15 +721,13 @@ contains
   end subroutine CiFunc
 
   !-----------------------------------------------------------------------
-  subroutine CiFuncGs (p, ic, il, mlcanopy_inst, ci_val)
+  subroutine CiFuncGs (p, ic, il, ipft, mlcanopy_inst, ci_val)
     !
     ! !DESCRIPTION:
     ! Calculate leaf photosynthesis for a specified stomatal conductance.
     ! Then calculate Ci from the diffusion equation. 
     !
     ! !USES:
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLCanopyVarCon, only : qe_c4, colim_c3a, colim_c4a, colim_c4b, dh2o_to_dco2
     use MLCanopyVarCtl, only : colim_type
     use MLMathToolsMod, only : quadratic
@@ -709,6 +740,7 @@ contains
     integer, intent(in) :: il       ! Sunlit (1) or shaded (2) leaf index
     real(r8), intent(out) :: ci_val ! Calculated value for Ci (umol/mol)
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
+    integer, intent(in) :: ipft     ! PFT index of the current patch
     !
     ! !LOCAL VARIABLES:
     real(r8) :: gleaf               ! Leaf CO2 conductance (mol CO2/m2/s)
@@ -720,7 +752,7 @@ contains
 
     associate ( &
                                                ! *** Input ***
-    c3psn  => pftcon%c3psn                , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
+    c3psn  => photo_params%c3psn                , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
     o2ref  => mlcanopy_inst%o2ref_forcing , &  ! Atmospheric O2 at reference height (mmol/mol)
     dpai   => mlcanopy_inst%dpai_profile  , &  ! Canopy layer plant area index (m2/m2)
     cair   => mlcanopy_inst%cair_profile  , &  ! Canopy layer atmospheric CO2 (umol/mol)
@@ -757,7 +789,7 @@ contains
 
        ! Gross assimilation rates
 
-       if (nint(c3psn(patch%itype(p))) == 1) then
+       if (nint(c3psn(ipft)) == 1) then
 
           ! C3: Rubisco-limited photosynthesis
 
@@ -787,7 +819,7 @@ contains
 
           ap(p,ic,il) = 0._r8
 
-       else if (nint(c3psn(patch%itype(p))) == 0) then
+       else if (nint(c3psn(ipft)) == 0) then
 
           ! C4: Rubisco-limited photosynthesis
           ac(p,ic,il) = vcmax(p,ic,il)
@@ -807,10 +839,10 @@ contains
 
           ! No co-limitation - use minimum rate
 
-          if (nint(c3psn(patch%itype(p))) == 1) then
+          if (nint(c3psn(ipft)) == 1) then
              ! No product-limited photosynthesis for C3
              agross(p,ic,il) = min(ac(p,ic,il), aj(p,ic,il))
-          else if (nint(c3psn(patch%itype(p))) == 0) then
+          else if (nint(c3psn(ipft)) == 0) then
              ! Include PEP carboxylase-limited photosynthesis for C4
              agross(p,ic,il) = min(ac(p,ic,il), aj(p,ic,il), ap(p,ic,il))
           end if
@@ -819,9 +851,9 @@ contains
 
           ! First co-limit Ac and Aj
 
-          if (nint(c3psn(patch%itype(p))) == 1) then
+          if (nint(c3psn(ipft)) == 1) then
              aquad = colim_c3a
-          else if (nint(c3psn(patch%itype(p))) == 0) then
+          else if (nint(c3psn(ipft)) == 0) then
              aquad = colim_c4a
           end if
           bquad = -(ac(p,ic,il) + aj(p,ic,il))
@@ -831,9 +863,9 @@ contains
 
           ! Now co-limit again using Ap, but only for C4 plants
 
-          if (nint(c3psn(patch%itype(p))) == 1) then
+          if (nint(c3psn(ipft)) == 1) then
              agross(p,ic,il) = ai
-          else if (nint(c3psn(patch%itype(p))) == 0) then
+          else if (nint(c3psn(ipft)) == 0) then
              aquad = colim_c4b
              bquad = -(ai + ap(p,ic,il))
              cquad = ai * ap(p,ic,il)
@@ -874,14 +906,12 @@ contains
   end subroutine CiFuncGs
 
   !-----------------------------------------------------------------------
-  subroutine StomataOptimization (p, ic, il, mlcanopy_inst)
+  subroutine StomataOptimization (p, ic, il, ipft, mlcanopy_inst)
     !
     ! !DESCRIPTION:
     ! Photosynthesis and stomatal conductance with water-use efficiency optimization
     !
     ! !USES:
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLMathToolsMod, only : zbrent, bisection
     use MLCanopyFluxesType, only : mlcanopy_type
     !
@@ -891,6 +921,7 @@ contains
     integer, intent(in) :: ic             ! Aboveground layer index
     integer, intent(in) :: il             ! Sunlit (1) or shaded (2) leaf index
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
+    integer, intent(in) :: ipft     ! PFT index of the current patch
     !
     ! !LOCAL VARIABLES:
     real(r8) :: gs1, gs2                  ! Initial guess for gs (mol H2O/m2/s)
@@ -899,7 +930,7 @@ contains
     !---------------------------------------------------------------------
 
     associate ( &
-    gsmin_SPA => pftcon%gsmin_SPA              , &  ! CLMml: Minimum stomatal conductance (mol H2O/m2/s)
+    gsmin_SPA => photo_params%gsmin_SPA              , &  ! CLMml: Minimum stomatal conductance (mol H2O/m2/s)
     dpai      => mlcanopy_inst%dpai_profile    , &  ! Canopy layer plant area index (m2/m2)
     ci        => mlcanopy_inst%ci_leaf         , &  ! Leaf intercellular CO2
     gs        => mlcanopy_inst%gs_leaf           &  ! Leaf stomatal conductance (mol H2O/m2 leaf/s)
@@ -907,7 +938,7 @@ contains
 
     ! Low and high initial estimates for gs (mol H2O/m2/s)
 
-    gs1 = gsmin_SPA(patch%itype(p))
+    gs1 = gsmin_SPA(ipft)
     gs2 = 2._r8
 
     ! Calculate gs
@@ -917,22 +948,22 @@ contains
        ! Check for minimum stomatal conductance linked to low light based on
        ! the water-use efficiency check for gs1 and gs2
 
-       call StomataEfficiency (p, ic, il, mlcanopy_inst, gs1, check1)
-       call StomataEfficiency (p, ic, il, mlcanopy_inst, gs2, check2)
+       call StomataEfficiency (p, ic, il, ipft, mlcanopy_inst, gs1, check1)
+       call StomataEfficiency (p, ic, il, ipft, mlcanopy_inst, gs2, check2)
 
        if (check1 * check2 < 0._r8) then
 
           ! Calculate gs using the function StomataEfficiency to iterate gs
           ! to an accuracy of tol (mol H2O/m2/s)
 
-!         gs(p,ic,il) = zbrent ('StomataOptimization', p, ic, il, mlcanopy_inst, StomataEfficiency, gs1, gs2, tol)
-          gs(p,ic,il) = bisection ('StomataOptimization', p, ic, il, mlcanopy_inst, StomataEfficiency, gs1, gs2, tol)
+!         gs(p,ic,il) = zbrent ('StomataOptimization', p, ic, il, ipft, mlcanopy_inst, StomataEfficiency, gs1, gs2, tol)
+          gs(p,ic,il) = bisection ('StomataOptimization', p, ic, il, ipft, mlcanopy_inst, StomataEfficiency, gs1, gs2, tol)
 
        else
 
           ! Low light - set gs to minimum conductance
 
-          gs(p,ic,il) = gsmin_SPA(patch%itype(p))
+          gs(p,ic,il) = gsmin_SPA(ipft)
 
        end if
 
@@ -944,13 +975,13 @@ contains
 
     ! Calculate photosynthesis for this value of gs
 
-    call CiFuncGs (p, ic, il, mlcanopy_inst, ci(p,ic,il))
+    call CiFuncGs (p, ic, il, ipft, mlcanopy_inst, ci(p,ic,il))
 
     end associate
   end subroutine StomataOptimization
 
   !-----------------------------------------------------------------------
-  subroutine StomataEfficiency (p, ic, il, mlcanopy_inst, gs_val, check)
+  subroutine StomataEfficiency (p, ic, il, ipft, mlcanopy_inst, gs_val, check )
     !
     ! !DESCRIPTION:
     ! Water-use efficiency check to determine optimal gs. For the stomatal
@@ -961,8 +992,6 @@ contains
     ! photosynthesis < iota*vpd*delta. 
     !
     ! !USES:
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLCanopyVarCon, only: vpd_min_MED
     use MLCanopyFluxesType, only : mlcanopy_type
     !
@@ -974,6 +1003,7 @@ contains
     real(r8), intent(in) :: gs_val   ! Value for gs to use in calculations
     real(r8), intent(out) :: check   ! Marginal water-use efficiency check
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
+    integer, intent(in) :: ipft     ! PFT index of the current patch
     !
     ! !LOCAL VARIABLES:
     real(r8) :: delta                ! Small difference for gs (mol H2O/m2/s)
@@ -984,7 +1014,7 @@ contains
     !---------------------------------------------------------------------
 
     associate ( &
-    iota_SPA    => pftcon%iota_SPA              , &  ! CLMml: Stomatal water-use efficiency (umol CO2/ mol H2O)
+    iota_SPA    => photo_params%iota_SPA              , &  ! CLMml: Stomatal water-use efficiency (umol CO2/ mol H2O)
     pref        => mlcanopy_inst%pref_forcing   , &  ! Air pressure at reference height (Pa)
     eair        => mlcanopy_inst%eair_profile   , &  ! Canopy layer vapor pressure (Pa)
     gbv         => mlcanopy_inst%gbv_leaf       , &  ! Leaf boundary layer conductance: H2O (mol H2O/m2 leaf/s)
@@ -1001,13 +1031,13 @@ contains
     ! Photosynthesis at lower gs (gs_val - delta)
 
     gs(p,ic,il) = gs_val - delta
-    call CiFuncGs (p, ic, il, mlcanopy_inst, ci(p,ic,il))
+    call CiFuncGs (p, ic, il, ipft, mlcanopy_inst, ci(p,ic,il))
     an_low = anet(p,ic,il)
 
     ! Photosynthesis at higher gs (gs_val)
 
     gs(p,ic,il) = gs_val
-    call CiFuncGs (p, ic, il, mlcanopy_inst, ci(p,ic,il))
+    call CiFuncGs (p, ic, il, ipft, mlcanopy_inst, ci(p,ic,il))
     an_high = anet(p,ic,il)
 
     ! Vapor pressure at leaf surface (needed for water-use efficiency check)
@@ -1019,20 +1049,18 @@ contains
 
     ! Marginal water-use efficiency: check is < 0 when d(An)/d(gs) is < iota * vpd
 
-    check = (an_high - an_low) - iota_SPA(patch%itype(p)) * delta * (vpd / pref(p))
+    check = (an_high - an_low) - iota_SPA(ipft) * delta * (vpd / pref(p))
 
     end associate
   end subroutine StomataEfficiency
 
   !-----------------------------------------------------------------------
-  subroutine C13Fractionation (p, ic, il, mlcanopy_inst)
+  subroutine C13Fractionation (p, ic, il, ipft, mlcanopy_inst)
     !
     ! !DESCRIPTION:
     ! 13C fractionation for photosynthesis
     !
     ! !USES:
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:
@@ -1041,13 +1069,13 @@ contains
     integer, intent(in) :: ic       ! Aboveground layer index
     integer, intent(in) :: il       ! Sunlit (1) or shaded (2) leaf index
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
+    integer, intent(in) :: ipft     ! PFT index of the current patch
     !
     ! !LOCAL VARIABLES:
     !---------------------------------------------------------------------
 
     associate ( &
                                                   ! *** Input ***
-    c3psn     => pftcon%c3psn                , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
     dpai      => mlcanopy_inst%dpai_profile  , &  ! Canopy layer plant area index (m2/m2)
     cair      => mlcanopy_inst%cair_profile  , &  ! Canopy layer atmospheric CO2 (umol/mol)
     apar      => mlcanopy_inst%apar_leaf     , &  ! Leaf absorbed PAR (umol photon/m2 leaf/s)
@@ -1059,9 +1087,9 @@ contains
     if (dpai(p,ic) > 0._r8) then
 
        if (apar(p,ic,il) > 0._r8) then
-          if (nint(c3psn(patch%itype(p))) == 1) then
+          if (nint(c3psn(ipft)) == 1) then
              alphapsn(p,ic,il) = 1._r8 + (4.4_r8 + 22.6_r8 * ci(p,ic,il) / cair(p,ic)) / 1000._r8
-          else if (nint(c3psn(patch%itype(p))) == 0) then
+          else if (nint(c3psn(ipft)) == 0) then
              alphapsn(p,ic,il) = 1._r8 + 4.4_r8 / 1000._r8
           end if
        else

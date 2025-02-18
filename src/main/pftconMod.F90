@@ -13,6 +13,8 @@ module pftconMod
   use CropReprPoolsMod, only : repr_structure_min, repr_structure_max
   use MLSolarRadiationMod, only : rad_params
   use MLSolarRadiationMod, only : AllocateMLSolarParams
+  use MLLeafPhotosynthesisMod, only : photo_params
+  use MLLeafPhotosynthesisMod, only : AllocateMLPhotoParams
   
   !
   ! !PUBLIC TYPES:
@@ -557,6 +559,7 @@ contains
     
     if( .not. use_fates ) then
        call AllocateMLSolarParams(mxpft)
+       call AllocateMLPhotoParams(mxpft)
     end if
     
   end subroutine InitAllocate
@@ -1571,9 +1574,18 @@ contains
              rad_params%rhos(i,j)    = this%rhos(i,j) 
              rad_params%taul(i,j)    = this%taul(i,j)
              rad_params%taus(i,j)    = this%taus(i,j)
-             rad_params%xl(i)        = this%xl(i)
-             rad_params%clump_fac(i) = this%clump_fac(i)
           end do
+          rad_params%xl(i)        = this%xl(i)
+          rad_params%clump_fac(i) = this%clump_fac(i)
+          photo_params%c3psn(i)  =  int(this%c3psn(i))
+          photo_params%g0_BB(i)  =  this%g0_BB(i)
+          photo_params%g1_BB(i)  =  this%g1_BB(i)
+          photo_params%g0_MED(i) =  this%g0_MED(i)
+          photo_params%g1_MED(i) =  this%g1_MED(i)
+          photo_params%psi50_ps(i)  = this%psi50_ps(i)
+          photo_params%shape_gs(i)  = this%shape_gs(i)
+          photo_params%gsmin_SPA(i) = this%gsmin_SPA(i)
+          photo_params%ioto_SPA(i)  = this%ioto_SPA(i)
        end do
     end if
        

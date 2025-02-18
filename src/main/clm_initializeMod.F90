@@ -178,7 +178,7 @@ contains
     use CNSharedParamsMod             , only : CNParamsSetSoilDepth
     use NutrientCompetitionFactoryMod , only : create_nutrient_competition_method
     use FATESFireFactoryMod           , only : scalar_lightning
-    use MLCanopyTurbulenceMod         , only : LookupPsihatINI   !!! CLMml !!!
+    use MLCanopyGetPsiHatMod          , only : LookupPsihatINI   !!! CLMml !!!
     use dynFATESLandUseChangeMod      , only : dynFatesLandUseInit
     use HillslopeHydrologyMod         , only : InitHillslope
     !

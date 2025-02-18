@@ -26,8 +26,6 @@ contains
     !
     ! !USES:
     use MLCanopyVarCon, only : tfrz, grav
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLCanopyVarCon, only : visc0, dh0, dv0, dc0, gb_factor
     use MLCanopyVarCtl, only : gb_type
     use MLCanopyFluxesType, only : mlcanopy_type
@@ -69,7 +67,6 @@ contains
 
     associate ( &
                                                    ! *** Input ***
-    dleaf     => pftcon%dleaf                 , &  ! CLM: Leaf dimension (m)
     tref      => mlcanopy_inst%tref_forcing   , &  ! Air temperature at reference height (K)
     pref      => mlcanopy_inst%pref_forcing   , &  ! Air pressure at reference height (Pa)
     rhomol    => mlcanopy_inst%rhomol_forcing , &  ! Molar density at reference height (mol/m3)
@@ -78,6 +75,7 @@ contains
     wind      => mlcanopy_inst%wind_profile   , &  ! Canopy layer wind speed (m/s)
     tair      => mlcanopy_inst%tair_profile   , &  ! Canopy layer air temperature (K)
     tleaf     => mlcanopy_inst%tleaf_leaf     , &  ! Leaf temperature (K)
+    dleaf     => mlcanopy_inst%dleaf_profile  , &  ! Mean leaf width (m)
                                                    ! *** Output ***
     gbh       => mlcanopy_inst%gbh_leaf       , &  ! Leaf boundary layer conductance: heat (mol/m2 leaf/s)
     gbv       => mlcanopy_inst%gbv_leaf       , &  ! Leaf boundary layer conductance: H2O (mol H2O/m2 leaf/s)
@@ -104,7 +102,7 @@ contains
 
                 ! Use CLM5 simplification: units are m/s
 
-                gbh(p,ic,il) = 0.005 * sqrt(wind(p,ic) / dleaf(patch%itype(p)))
+                gbh(p,ic,il) = 0.005 * sqrt(wind(p,ic) / dleaf(p,ic))
                 gbv(p,ic,il) = gbh(p,ic,il)
                 gbc(p,ic,il) = gbv(p,ic,il) / 1.4_r8
 
@@ -114,11 +112,11 @@ contains
 
                 ! a. Reynolds number, Prandtl number, Schmidt numbers, and Grashof number
 
-                re = wind(p,ic) * dleaf(patch%itype(p)) / visc
+                re = wind(p,ic) * dleaf(p,ic) / visc
                 pr  = visc / dh
                 scv = visc / dv
                 scc = visc / dc
-                gr = grav * dleaf(patch%itype(p))**3 * max(tleaf(p,ic,il)-tair(p,ic), 0._r8) / (tair(p,ic) * visc * visc)
+                gr = grav * dleaf(p,ic)**3 * max(tleaf(p,ic,il)-tair(p,ic), 0._r8) / (tair(p,ic) * visc * visc)
 
                 ! b. Nusselt and Sherwood numbers depend on convection regime
 
@@ -173,9 +171,9 @@ contains
 
                 ! Boundary layer conductances (m/s)
 
-                gbh(p,ic,il) = dh *  nu / dleaf(patch%itype(p))
-                gbv(p,ic,il) = dv * shv / dleaf(patch%itype(p))
-                gbc(p,ic,il) = dc * shc / dleaf(patch%itype(p))
+                gbh(p,ic,il) = dh *  nu / dleaf(p,ic)
+                gbv(p,ic,il) = dv * shv / dleaf(p,ic)
+                gbc(p,ic,il) = dc * shc / dleaf(p,ic)
 
              case default
 

@@ -207,7 +207,8 @@ module MLCanopyFluxesType
     real(r8), pointer :: zs_profile(:,:)         ! Canopy layer height for scalar concentration and source (m)
     real(r8), pointer :: zw_profile(:,:)         ! Canopy height at interface between two adjacent layers (m)
     real(r8), pointer :: dz_profile(:,:)         ! Canopy layer thickness (m)
-
+    real(r8), pointer :: dleaf_profile(:,:)      ! Canopy layer mean leaf width (m)
+    
     real(r8), pointer :: vcmax25_profile(:,:)    ! Canopy layer leaf maximum carboxylation rate at 25C (umol/m2/s)
     real(r8), pointer :: jmax25_profile(:,:)     ! Canopy layer C3 maximum electron transport rate at 25C (umol/m2/s)
     real(r8), pointer :: kp25_profile(:,:)       ! Canopy layer C4 initial slope of CO2 response curve at 25C (mol/m2/s)
@@ -528,7 +529,8 @@ contains
     allocate (this%zs_profile          (begp:endp,1:nlevmlcan))                  ; this%zs_profile          (:,:)     = spval
     allocate (this%zw_profile          (begp:endp,0:nlevmlcan))                  ; this%zw_profile          (:,:)     = spval
     allocate (this%dz_profile          (begp:endp,1:nlevmlcan))                  ; this%dz_profile          (:,:)     = spval
-
+    allocate (this%dleaf_profile       (begp:endp,1:nlevmlcan))                  ; this%dleaf_profile       (:,:)     = spval
+    
     allocate (this%vcmax25_profile     (begp:endp,1:nlevmlcan))                  ; this%vcmax25_profile     (:,:)     = spval
     allocate (this%jmax25_profile      (begp:endp,1:nlevmlcan))                  ; this%jmax25_profile      (:,:)     = spval
     allocate (this%kp25_profile        (begp:endp,1:nlevmlcan))                  ; this%kp25_profile        (:,:)     = spval

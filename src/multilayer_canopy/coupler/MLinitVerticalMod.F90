@@ -88,7 +88,8 @@ contains
     dsai_frac   => mlcanopy_inst%dsai_frac_profile   , &  ! Canopy layer stem area index (fraction of canopy total)
     zs          => mlcanopy_inst%zs_profile          , &  ! Canopy layer height for scalar concentration and source (m)
     zw          => mlcanopy_inst%zw_profile          , &  ! Canopy height at interface between two adjacent layers (m)
-    dz          => mlcanopy_inst%dz_profile            &  ! Canopy layer thickness (m)
+    dz          => mlcanopy_inst%dz_profile          , &  ! Canopy layer thickness (m)
+    dleaf_prof  => mlcanopy_inst%dleaf_profile         &  ! Mean leaf width over canopy (constant value, set to pftcon)
     )
 
     do fp = 1, num_filter
@@ -322,6 +323,16 @@ contains
           call endrun (msg=' ERROR: initVerticalStructure: canopy layer has zero plant area index')
        end if
 
+
+       ! Assign the pft's leaf diameter trait, uniformly
+       ! to the profile. (we do this because this trait
+       ! is NOT uniform using models with mixed canopies,
+       ! ie FATES)
+
+       do ic = 1, ncan(p)
+          dleaf_prof(p,ic) = pftcon%dleaf(patch%itype(p))
+       end do
+       
     end do
 
     end associate

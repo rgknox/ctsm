@@ -10,7 +10,7 @@ module MLSolarRadiationMod
   !
   ! !USES:
   use MLCanopyVarCtl, only : endrun
-  use clm_varctl, only : iulog
+  use MLCanopyVarPar, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   use MLCanopyFluxesType, only : mlcanopy_type
   !

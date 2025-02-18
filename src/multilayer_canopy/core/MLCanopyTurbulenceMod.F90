@@ -6,7 +6,7 @@ module MLCanopyTurbulenceMod
   !
   ! !USES:
   use MLCanopyVarCtl, only : endrun
-  use clm_varctl, only : iulog, rslfile
+  use MLCanopyVarPar, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
   ! !PUBLIC TYPES:
@@ -1930,7 +1930,7 @@ contains
   end subroutine FluxProfileSolution
 
   !-----------------------------------------------------------------------
-  subroutine LookupPsihatINI
+  subroutine LookupPsihatINI(rslfile,masterproc)
     !
     ! !DESCRIPTION:
     ! Initialize the look-up tables needed to calculate the RSL psihat functions.
@@ -1942,11 +1942,14 @@ contains
     use fileutils, only : getfil
     use ncdio_pio, only : ncd_io, ncd_pio_closefile, ncd_pio_openfile, file_desc_t
     use ncdio_pio, only : ncd_inqdid, ncd_inqdlen
-    use spmdMod, only : masterproc
     use MLCanopyVarCon, only : nZ, nL, dtLgridM, zdtgridM, psigridM, dtLgridH, zdtgridH, psigridH
     !
-    ! !ARGUMENTS:
     implicit none
+
+    ! !ARGUMENTS:
+    character(len=256), intent(in) :: rslfile
+    logical,intent(in) :: masterproc
+    
     !
     !LOCAL VARIABLES
     character(len=256) :: locfn        ! Local file name

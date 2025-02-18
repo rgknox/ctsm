@@ -6,8 +6,7 @@ module MLLongwaveRadiationMod
   !
   ! !USES:
   use MLCanopyVarCtl, only : endrun
-  use clm_varctl, only : iulog
-  use decompMod, only : bounds_type
+  use MLCanopyVarPar, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   use MLCanopyFluxesType, only : mlcanopy_type
   !
@@ -24,7 +23,7 @@ module MLLongwaveRadiationMod
 contains
 
   !-----------------------------------------------------------------------
-  subroutine LongwaveRadiation (bounds, num_filter, filter, mlcanopy_inst)
+  subroutine LongwaveRadiation (num_filter, filter, mlcanopy_inst)
     !
     ! !DESCRIPTION:
     ! Longwave radiation transfer through canopy
@@ -34,7 +33,6 @@ contains
     !
     ! !ARGUMENTS:
     implicit none
-    type(bounds_type), intent(in) :: bounds
     integer, intent(in) :: num_filter           ! Number of patches in filter
     integer, intent(in) :: filter(:)            ! Patch filter
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
@@ -42,7 +40,7 @@ contains
 
     select case (longwave_type)
     case (1)
-       call Norman (bounds, num_filter, filter, mlcanopy_inst)
+       call Norman (num_filter, filter, mlcanopy_inst)
     case default
        call endrun (msg=' ERROR: LongwaveRadiation: longwave_type not valid')
     end select
@@ -50,7 +48,7 @@ contains
   end subroutine LongwaveRadiation
 
   !-----------------------------------------------------------------------
-  subroutine Norman (bounds, num_filter, filter, mlcanopy_inst)
+  subroutine Norman (num_filter, filter, mlcanopy_inst)
     !
     ! !DESCRIPTION:
     ! Longwave radiation transfer through canopy using Norman (1979)
@@ -66,7 +64,6 @@ contains
     !
     ! !ARGUMENTS:
     implicit none
-    type(bounds_type), intent(in) :: bounds
     integer, intent(in) :: num_filter           ! Number of patches in filter
     integer, intent(in) :: filter(:)            ! Patch filter
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst

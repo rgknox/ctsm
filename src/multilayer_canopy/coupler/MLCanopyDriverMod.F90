@@ -473,7 +473,7 @@ module MLCanopyDriverMod
 
        ! Longwave radiation transfer through the canopy
 
-       call LongwaveRadiation (bounds, num_mlcan, filter_mlcan, mlcanopy_inst)
+       call LongwaveRadiation (num_mlcan, filter_mlcan, mlcanopy_inst)
 
        ! Net radiation at each layer and at ground
 

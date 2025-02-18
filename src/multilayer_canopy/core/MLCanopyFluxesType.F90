@@ -328,11 +328,8 @@ module MLCanopyFluxesType
 
   contains
 
-    procedure, public  :: Init              ! CLM initialization of data type
     procedure, private :: InitAllocate      ! CLM initialization: allocate module data structure
-    procedure, private :: InitHistory       ! CLM initialization: setup history file variables
     procedure, private :: InitCold          ! CLM initialization: cold-start initialization
-    procedure, public  :: Restart           ! CLM restart file
 
   end type mlcanopy_type
   !-----------------------------------------------------------------------
@@ -340,7 +337,7 @@ module MLCanopyFluxesType
 contains
 
   !-----------------------------------------------------------------------
-  subroutine Init (this, bounds)
+  subroutine Init (this, begp, endp)
     !
     ! !DESCRIPTION:
     !
@@ -348,11 +345,14 @@ contains
     ! for history output, and initialize values needed for a cold-start
     !
     class(mlcanopy_type) :: this
-    type(bounds_type), intent(in) :: bounds
+    integer,intent(in)   :: begp
+    integer,intent(in)   :: endp
 
-    call this%InitAllocate (bounds)
-    call this%InitHistory  (bounds)
-    call this%InitCold     (bounds)
+    this%begp = begp
+    this%endp = endp
+    call this%InitAllocate()
+    call this%InitHistory ()
+    call this%InitCold    ()
 
   end subroutine Init
 
@@ -366,7 +366,7 @@ contains
     class(mlcanopy_type) :: this
     !
     ! !LOCAL VARIABLES:
-    integer :: begp      ! Beginning patch index for CLM g/l/c/p hierarchy
+    integer :: begp      ! Beginning patch index for array in
     integer :: endp      ! Ending patch index for CLM g/l/c/p hierarchy
     !---------------------------------------------------------------------
 
@@ -650,17 +650,16 @@ contains
   end subroutine InitAllocate
 
   !-----------------------------------------------------------------------
-  subroutine InitHistory (this, bounds)
+  subroutine InitHistory (this)
     !
     ! !DESCRIPTION:
     ! Setup the fields that can be output on history files
     !
     ! !USES:
-    use histFileMod, only: hist_addfld1d, hist_addfld2d
+    !use histFileMod, only: hist_addfld1d, hist_addfld2d
     !
     ! !ARGUMENTS:
     class(mlcanopy_type) :: this
-    type(bounds_type), intent(in) :: bounds
     !
     ! !LOCAL VARIABLES:
     integer :: begp, endp
@@ -668,30 +667,29 @@ contains
 
     begp = mlcanopy_inst%begp ; endp= mlcanopy_inst%endp
 
-    this%gppveg_canopy(begp:endp) = spval
-    call hist_addfld1d (fname='GPP_ML', units='umol/m2s', &
-         avgflag='A', long_name='Gross primary production', &
-         ptr_patch=this%gppveg_canopy, set_lake=spval, set_urb=spval)
+    !this%gppveg_canopy(begp:endp) = spval
+    !call hist_addfld1d (fname='GPP_ML', units='umol/m2s', &
+    !     avgflag='A', long_name='Gross primary production', &
+    !     ptr_patch=this%gppveg_canopy, set_lake=spval, set_urb=spval)
 
-    this%lwp_mean_profile(begp:endp,1:nlevmlcan) = spval
-    call hist_addfld2d (fname='LWP_ML', units='MPa', type2d='nlevmlcan', &
-         avgflag='A', long_name='Weighted maean leaf water potential of canopy layer', &
-         ptr_patch=this%lwp_mean_profile, set_lake=spval, set_urb=spval)
+    !this%lwp_mean_profile(begp:endp,1:nlevmlcan) = spval
+    !call hist_addfld2d (fname='LWP_ML', units='MPa', type2d='nlevmlcan', &
+    !     avgflag='A', long_name='Weighted maean leaf water potential of canopy layer', &
+    !     ptr_patch=this%lwp_mean_profile, set_lake=spval, set_urb=spval)
 
   end subroutine InitHistory
 
   !-----------------------------------------------------------------------
-  subroutine InitCold (this, bounds)
+  subroutine InitCold (this)
     !
     ! !DESCRIPTION:
     ! Cold-start initialization for multilayer canopy
     !
     ! !USES:
-    MLCanopyVarPar, only : nlevmlcan, isun, isha
+    use MLCanopyVarPar, only : nlevmlcan, isun, isha
     !
     ! !ARGUMENTS:
     class(mlcanopy_type) :: this
-    type(bounds_type), intent(in) :: bounds
     !
     ! !LOCAL VARIABLES:
     integer  :: p                ! Patch index for CLM g/l/c/p hierarchy
@@ -716,20 +714,19 @@ contains
   end subroutine InitCold
 
   !-----------------------------------------------------------------------
-  subroutine Restart (this, bounds, ncid, flag)
+  subroutine Restart (this) !, bounds, ncid, flag)
     !
     ! !DESCRIPTION:
     ! Read/Write module information to/from restart file
     !
     ! !USES:
-    use ncdio_pio, only : file_desc_t, ncd_defvar, ncd_io, ncd_double, ncd_int, ncd_inqvdlen
-    use restUtilMod, only : restartvar
+    !use ncdio_pio, only : file_desc_t, ncd_defvar, ncd_io, ncd_double, ncd_int, ncd_inqvdlen
+    !use restUtilMod, only : restartvar
     !
     ! !ARGUMENTS:
     class(mlcanopy_type) :: this
-    type(bounds_type), intent(in)    :: bounds
-    type(file_desc_t), intent(inout) :: ncid   ! netcdf id
-    character(len=*) , intent(in)    :: flag   ! 'read' or 'write'
+    !type(file_desc_t), intent(inout) :: ncid   ! netcdf id
+    !character(len=*) , intent(in)    :: flag   ! 'read' or 'write'
     !
     ! !LOCAL VARIABLES:
     logical :: readvar      ! determine if variable is on initial file
@@ -737,9 +734,9 @@ contains
 
     ! Example for 1-d patch variable
 
-    call restartvar(ncid=ncid, flag=flag, varname='taf_ml', xtype=ncd_double,  &
-       dim1name='pft', long_name='air temperature at canopy top', units='K', &
-       interpinic_flag='interp', readvar=readvar, data=this%taf_canopy)
+   ! call restartvar(ncid=ncid, flag=flag, varname='taf_ml', xtype=ncd_double,  &
+   !    dim1name='pft', long_name='air temperature at canopy top', units='K', &
+   !    interpinic_flag='interp', readvar=readvar, data=this%taf_canopy)
 
     ! Example for 2-d patch variable
     ! TODO bonan/slevis: Revisit this call. Doesn't build as written.

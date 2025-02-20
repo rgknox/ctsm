@@ -11,10 +11,12 @@ module pftconMod
   use clm_varpar  , only : mxpft, numrad, ivis, inir, cft_lb, cft_ub, ndecomp_pools
   use clm_varctl  , only : iulog, use_cndv, use_crop, use_grainproduct
   use CropReprPoolsMod, only : repr_structure_min, repr_structure_max
-  use MLSolarRadiationMod, only : rad_params
+  use MLSolarRadiationMod, only : mlrad_params
   use MLSolarRadiationMod, only : AllocateMLSolarParams
-  use MLLeafPhotosynthesisMod, only : photo_params
+  use MLLeafPhotosynthesisMod, only : mlphoto_params
   use MLLeafPhotosynthesisMod, only : AllocateMLPhotoParams
+  use MLPlantHydraulicsMod, only : mlhydro_params
+  use MLPlantHydraulicsMod, only : AllocateMLHydroParams
   
   !
   ! !PUBLIC TYPES:
@@ -560,6 +562,7 @@ contains
     if( .not. use_fates ) then
        call AllocateMLSolarParams(mxpft)
        call AllocateMLPhotoParams(mxpft)
+       call AllocateMLHydroParams(mxpft)
     end if
     
   end subroutine InitAllocate
@@ -1570,22 +1573,27 @@ contains
     if( .not. use_fates ) then
        do i = 0, mxpft
           do j = 1,numrad
-             rad_params%rhol(i,j)    = this%rhol(i,j)
-             rad_params%rhos(i,j)    = this%rhos(i,j) 
-             rad_params%taul(i,j)    = this%taul(i,j)
-             rad_params%taus(i,j)    = this%taus(i,j)
+             mlrad_params%rhol(i,j)    = this%rhol(i,j)
+             mlrad_params%rhos(i,j)    = this%rhos(i,j) 
+             mlrad_params%taul(i,j)    = this%taul(i,j)
+             mlrad_params%taus(i,j)    = this%taus(i,j)
           end do
-          rad_params%xl(i)        = this%xl(i)
-          rad_params%clump_fac(i) = this%clump_fac(i)
-          photo_params%c3psn(i)  =  int(this%c3psn(i))
-          photo_params%g0_BB(i)  =  this%g0_BB(i)
-          photo_params%g1_BB(i)  =  this%g1_BB(i)
-          photo_params%g0_MED(i) =  this%g0_MED(i)
-          photo_params%g1_MED(i) =  this%g1_MED(i)
-          photo_params%psi50_ps(i)  = this%psi50_ps(i)
-          photo_params%shape_gs(i)  = this%shape_gs(i)
-          photo_params%gsmin_SPA(i) = this%gsmin_SPA(i)
-          photo_params%ioto_SPA(i)  = this%ioto_SPA(i)
+          mlrad_params%xl(i)        = this%xl(i)
+          mlrad_params%clump_fac(i) = this%clump_fac(i)
+          mlphoto_params%c3psn(i)  =  int(this%c3psn(i))
+          mlphoto_params%g0_BB(i)  =  this%g0_BB(i)
+          mlphoto_params%g1_BB(i)  =  this%g1_BB(i)
+          mlphoto_params%g0_MED(i) =  this%g0_MED(i)
+          mlphoto_params%g1_MED(i) =  this%g1_MED(i)
+          mlphoto_params%psi50_ps(i)  = this%psi50_ps(i)
+          mlphoto_params%shape_gs(i)  = this%shape_gs(i)
+          mlphoto_params%gsmin_SPA(i) = this%gsmin_SPA(i)
+          mlphoto_params%ioto_SPA(i)  = this%ioto_SPA(i)
+          mlhydro_params%gplant_SPA(i)  = this%gplant_SPA(i)
+          mlhydro_params%root_radius_SPA(i)  = this%root_radius_SPA(i)
+          mlhydro_params%root_density_SPA(i)  = this%root_density_SPA(i)
+          mlhydro_params%root_resist_SPA(i)  = this%root_resist_SPA(i)
+          
        end do
     end if
        

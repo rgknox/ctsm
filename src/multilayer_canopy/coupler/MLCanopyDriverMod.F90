@@ -441,9 +441,9 @@ module MLCanopyDriverMod
     ! Plant hydraulics
 
     call SoilResistance (num_mlcan, filter_mlcan, &
-    soilstate_inst, waterstatebulk_inst, mlcanopy_inst)
+    soilstate_inst, waterstatebulk_inst, mlcanopy_inst, pft_mlcan)
 
-    call PlantResistance (num_mlcan, filter_mlcan, mlcanopy_inst)
+    call PlantResistance (num_mlcan, filter_mlcan, mlcanopy_inst, pft_mlcan)
 
     ! Canopy profile of photosynthetic capacity
 
@@ -515,8 +515,8 @@ module MLCanopyDriverMod
 
        ! Update leaf water potential for the current transpiration rate
 
-       call LeafWaterPotential (num_mlcan, filter_mlcan, isun, mlcanopy_inst)
-       call LeafWaterPotential (num_mlcan, filter_mlcan, isha, mlcanopy_inst)
+       call LeafWaterPotential (num_mlcan, filter_mlcan, isun, mlcanopy_inst, pft_mlcan)
+       call LeafWaterPotential (num_mlcan, filter_mlcan, isha, mlcanopy_inst, pft_mlcan)
 
        ! Update canopy intercepted water for evaporation and dew
 

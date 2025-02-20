@@ -16,18 +16,40 @@ module MLPlantHydraulicsMod
   public :: PlantResistance        ! Calculate whole-plant resistance
   public :: SoilResistance         ! Calculate soil resistance and water uptake
   public :: LeafWaterPotential     ! Calculate leaf water potential
+  public :: AllocateMLHydroParams
   !-----------------------------------------------------------------------
 
+  type, public :: mlhydro_params_type
+     real(r8), allocatable :: gplant_SPA       (:) ! Stem (xylem-to-leaf) hydraulic conductance (mmol H2O/m2 leaf area/s/MPa)
+     real(r8), allocatable :: root_radius_SPA  (:) ! Fine root radius (m)
+     real(r8), allocatable :: root_density_SPA (:) ! Fine root density (g biomass / m3 root)
+     real(r8), allocatable :: root_resist_SPA  (:) ! Hydraulic resistivity of root tissue (MPa.s.g/mmol H2O)
+  end type mlhydro_params_type
+  
+  type(mlhydro_params_type),public :: mlhydro_params
+  
 contains
 
-  subroutine PlantResistance (num_filter, filter, mlcanopy_inst)
+
+  subroutine AllocateMLHydroParams(n_pft)
+      
+    integer,intent(in) :: n_pft
+    
+    allocate(mlhydro_params%gplant_SPA(0:n_pft))
+    allocate(mlhydro_params%root_radius_SPA(0:n_pft))
+    allocate(mlhydro_params%root_density_SPA(0:n_pft))
+    allocate(mlhydro_params%root_resist_SPA(0:n_pft))
+    
+  end subroutine AllocateMLHydroParams
+
+  ! ======================================================================
+
+  subroutine PlantResistance (num_filter, filter, mlcanopy_inst, pft)
     !
     ! !DESCRIPTION:
     ! Calculate whole-plant leaf-specific conductance (soil-to-leaf)
     ! 
     ! !USES:
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:
@@ -35,6 +57,7 @@ contains
     integer, intent(in) :: num_filter       ! Number of patches in filter
     integer, intent(in) :: filter(:)        ! Patch filter
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
+    integer, intent(in) :: pft(:)           ! plant functional type associated with the filter index (patch)
     !
     ! !LOCAL VARIABLES:
     integer  :: fp                          ! Filter index
@@ -45,7 +68,7 @@ contains
 
     associate ( &
                                                   ! *** Input ***
-    gplant_SPA => pftcon%gplant_SPA          , &  ! CLMml: Stem (xylem-to-leaf) hydraulic conductance (mmol H2O/m2 leaf area/s/MPa)
+    gplant_SPA => mlhydro_params%gplant_SPA          , &  ! CLMml: Stem (xylem-to-leaf) hydraulic conductance (mmol H2O/m2 leaf area/s/MPa)
     ncan       => mlcanopy_inst%ncan_canopy  , &  ! Number of aboveground layers
     rsoil      => mlcanopy_inst%rsoil_soil   , &  ! Soil hydraulic resistance (MPa.s.m2/mmol H2O)
     dpai       => mlcanopy_inst%dpai_profile , &  ! Canopy layer plant area index (m2/m2)
@@ -62,8 +85,8 @@ contains
 
              ! Aboveground plant stem resistance, xylem-to-leaf (MPa.s.m2/mmol H2O)
 
-!            rplant = zs(p,ic) / gplant_SPA(patch%itype(p))       ! gplant_SPA is conductivity (mmol H2O/m/s/MPa)
-             rplant = 1._r8 / gplant_SPA(patch%itype(p))          ! gplant_SPA is conductance (mmol H2O/m2/s/MPa)
+!            rplant = zs(p,ic) / gplant_SPA(pft(fp))       ! gplant_SPA is conductivity (mmol H2O/m/s/MPa)
+             rplant = 1._r8 / gplant_SPA(pft(fp))          ! gplant_SPA is conductance (mmol H2O/m2/s/MPa)
 
              ! Leaf specific conductance, soil-to-leaf (mmol H2O/m2/s/MPa)
 
@@ -83,7 +106,7 @@ contains
 
   !-----------------------------------------------------------------------
   subroutine SoilResistance (num_filter, filter, &
-  soilstate_inst, waterstatebulk_inst, mlcanopy_inst)
+  soilstate_inst, waterstatebulk_inst, mlcanopy_inst, pft)
     !
     ! !DESCRIPTION:
     ! Calculate soil hydraulic resistance and water uptake from each soil layer
@@ -92,8 +115,6 @@ contains
     use clm_varcon, only : pi => rpi, denh2o, grav
     use clm_varpar, only : nlevsoi
     use ColumnType, only : col
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLCanopyVarCon, only : mmh2o
     use SoilStateType, only : soilstate_type
     use WaterStateBulkType, only : waterstatebulk_type
@@ -107,6 +128,7 @@ contains
     type(soilstate_type), intent(in) :: soilstate_inst
     type(waterstatebulk_type), intent(in) :: waterstatebulk_inst
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
+    integer, intent(in) :: pft(:)                         ! plant functional type associated with the filter index (patch)
     !
     ! !LOCAL VARIABLES:
     integer  :: fp                               ! Filter index
@@ -131,9 +153,9 @@ contains
 
     associate ( &
                                                                ! *** Input ***
-    root_radius_SPA  => pftcon%root_radius_SPA            , &  ! CLMml: Fine root radius (m)
-    root_density_SPA => pftcon%root_density_SPA           , &  ! CLMml: Fine root density (g biomass / m3 root)
-    root_resist_SPA  => pftcon%root_resist_SPA            , &  ! CLMml: Hydraulic resistivity of root tissue (MPa.s.g/mmol H2O)
+    root_radius_SPA  => mlhydro_params%root_radius_SPA            , &  ! CLMml: Fine root radius (m)
+    root_density_SPA => mlhydro_params%root_density_SPA           , &  ! CLMml: Fine root density (g biomass / m3 root)
+    root_resist_SPA  => mlhydro_params%root_resist_SPA            , &  ! CLMml: Hydraulic resistivity of root tissue (MPa.s.g/mmol H2O)
     dz               => col%dz                            , &  ! CLM: Soil layer thickness (m)
     nbedrock         => col%nbedrock                      , &  ! Depth to bedrock index
     smp_l            => soilstate_inst%smp_l_col          , &  ! CLM: Soil layer matric potential (mm)
@@ -162,7 +184,7 @@ contains
 
        ! Root cross-sectional area
 
-       root_cross_sec_area = pi * root_radius_SPA(patch%itype(p))**2
+       root_cross_sec_area = pi * root_radius_SPA(pft(fp))**2
 
        ! Loop over soil layers
 
@@ -183,7 +205,7 @@ contains
 
           ! Root length density: m root per m3 soil
 
-          root_length_density = root_biomass_density / (root_density_SPA(patch%itype(p)) * root_cross_sec_area)
+          root_length_density = root_biomass_density / (root_density_SPA(pft(fp)) * root_cross_sec_area)
 
           ! Distance between roots: m
 
@@ -191,11 +213,11 @@ contains
 
           ! Soil-to-root resistance (MPa.s.m2/mmol H2O)
 
-          soilr1 = log(root_dist/root_radius_SPA(patch%itype(p))) / (2._r8 * pi * root_length_density * dz(c,j) * hk)
+          soilr1 = log(root_dist/root_radius_SPA(pft(fp))) / (2._r8 * pi * root_length_density * dz(c,j) * hk)
 
           ! Root-to-stem resistance (MPa.s.m2/mmol H2O)
 
-          soilr2 = root_resist_SPA(patch%itype(p)) / (root_biomass_density * dz(c,j))
+          soilr2 = root_resist_SPA(pft(fp)) / (root_biomass_density * dz(c,j))
 
           ! Belowground resistance (MPa.s.m2/mmol H2O) 
 
@@ -247,15 +269,13 @@ contains
   end subroutine SoilResistance
 
   !-----------------------------------------------------------------------
-  subroutine LeafWaterPotential (num_filter, filter, il, mlcanopy_inst)
+  subroutine LeafWaterPotential (num_filter, filter, il, mlcanopy_inst, pft)
     !
     ! !DESCRIPTION:
     ! Calculate leaf water potential
     !
     ! !USES:
     use clm_varcon, only : denh2o, grav
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLCanopyVarCtl, only : dtime_substep
     use MLCanopyFluxesType, only : mlcanopy_type
     !
@@ -265,6 +285,7 @@ contains
     integer, intent(in) :: filter(:)             ! Patch filter
     integer, intent(in) :: il                    ! Sunlit (1) or shaded (2) leaf index
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
+    integer, intent(in) :: pft(:)                         ! plant functional type associated with the filter index (patch)
     !
     ! !LOCAL VARIABLES:
     integer  :: fp                               ! Filter index
@@ -279,7 +300,7 @@ contains
 
     associate ( &
                                                    ! *** Input ***
-    capac_SPA   => pftcon%capac_SPA           , &  ! CLMml: Plant capacitance (mmol H2O/m2 leaf area/MPa)
+    capac_SPA   => mlhydro_params%capac_SPA           , &  ! CLMml: Plant capacitance (mmol H2O/m2 leaf area/MPa)
     ncan        => mlcanopy_inst%ncan_canopy  , &  ! Number of aboveground layers
     psis        => mlcanopy_inst%psis_soil    , &  ! Weighted soil water potential (MPa)
     dpai        => mlcanopy_inst%dpai_profile , &  ! Canopy layer plant area index (m2/m2)
@@ -306,7 +327,7 @@ contains
           if (dpai(p,ic) > 0._r8) then
              y0 = lwp(p,ic,il)
              a = psis(p) - head * zs(p,ic) - 1000._r8 * trleaf(p,ic,il) / lsc(p,ic)
-             b = capac_SPA(patch%itype(p)) / lsc(p,ic)
+             b = capac_SPA(pft(fp)) / lsc(p,ic)
              dy = (a - y0) * (1._r8 - exp(-dtime/b))
              lwp(p,ic,il) = y0 + dy
           else

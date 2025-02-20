@@ -90,6 +90,7 @@ contains
     zw          => mlcanopy_inst%zw_profile          , &  ! Canopy height at interface between two adjacent layers (m)
     dz          => mlcanopy_inst%dz_profile          , &  ! Canopy layer thickness (m)
     dleaf_prof  => mlcanopy_inst%dleaf_profile       , &  ! Mean leaf width over canopy (constant value, set to pftcon)
+    sla_prof    => mlcanopy_inst%sla_profile         , &  ! Mean specific leaf area over canopy layers (m2/g)
     emleaf_prof => mlcanopy_inst%emleaf_profile        &  ! Mean leaf LW emissivity over canopy layers
     )
 
@@ -324,21 +325,25 @@ contains
           call endrun (msg=' ERROR: initVerticalStructure: canopy layer has zero plant area index')
        end if
 
-
-       ! Assign the pft's leaf diameter trait, uniformly
-       ! to the profile. (we do this because this trait
-       ! is NOT uniform using models with mixed canopies,
-       ! ie FATES)
-
        do ic = 1, ncan(p)
+          
+          ! Assign the pft's leaf diameter trait, uniformly
+          ! to the profile. (we do this because this trait
+          ! is NOT uniform using models with mixed canopies,
+          ! ie FATES)
+          
           dleaf_prof(p,ic) = pftcon%dleaf(patch%itype(p))
+
+          ! Assign the pft's LW emissivity to the pft x layer
+          
+          emleaf_prof(p,ic) = pftcon%emleaf(patch%itype(p))
+
+          ! Assign specific leaf area to patch x layer
+          
+          sla_prof(p,ic) = pftcon%slatop(patch%itype(p))
+
        end do
 
-       ! Assign the pft's LW emissivity to the pft x layer
-       
-       do ic = 1, ncan(p)
-          emleaf_prof(p,ic) = pftcon%emleaf(patch%itype(p))
-       end do
        
     end do
 

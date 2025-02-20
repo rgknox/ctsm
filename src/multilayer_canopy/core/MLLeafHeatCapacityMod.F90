@@ -26,8 +26,6 @@ contains
     !
     ! !USES:
     use MLCanopyVarCon, only : cpliq
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
     use MLCanopyVarCon, only : cpbio, fcarbon, fwater
     use MLCanopyFluxesType, only : mlcanopy_type
     !
@@ -49,9 +47,9 @@ contains
 
     associate ( &
                                                  ! *** Input ***
-    slatop    => pftcon%slatop              , &  ! CLM: Specific leaf area at top of canopy (m2/gC)
     ncan      => mlcanopy_inst%ncan_canopy  , &  ! Number of aboveground layers
     dpai      => mlcanopy_inst%dpai_profile , &  ! Canopy layer plant area index (m2/m2)
+    sla       => mlcanopy_inst%sla_profile  , &  ! Specific Leaf Area over depth (m2/g)
                                                  ! *** Output ***
     cpleaf    => mlcanopy_inst%cpleaf_profile &  ! Canopy layer leaf heat capacity (J/m2 leaf/K)
     )
@@ -66,7 +64,7 @@ contains
        p = filter(fp)
        do ic = 1, ncan(p)
           if (dpai(p,ic) > 0._r8) then
-             lma = 1._r8 / slatop(patch%itype(p)) * 0.001_r8                ! m2 / g C -> kg C / m2
+             lma = 1._r8 / sla(p,ic) * 0.001_r8                             ! m2 / g C -> kg C / m2
              dry_weight = lma / fcarbon                                     ! kg C / m2 -> kg DM / m2
              fresh_weight = dry_weight / (1._r8 - fwater)                   ! kg DM / m2 -> kg FM / m2
              leaf_water = fwater * fresh_weight                             ! Leaf water (kg H2O / m2 leaf)

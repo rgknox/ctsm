@@ -27,7 +27,7 @@ module MLSolarRadiationMod
 
   !-----------------------------------------------------------------------
 
-  type, public :: rad_params_type
+  type, public :: mlrad_params_type
      
      ! From the parameter file
      real(r8), allocatable :: rhol(:,:)         ! leaf material reflectance:   (pft x band)
@@ -37,9 +37,9 @@ module MLSolarRadiationMod
      real(r8), allocatable :: xl(:)             ! leaf/stem orientation (pft)
      real(r8), allocatable :: clump_fac(:)      ! clumping index 0-1, when
                                                 ! leaves stick together (pft)
-  end type rad_params_type
+  end type mlrad_params_type
 
-  type(rad_params_type),public :: rad_params
+  type(mlrad_params_type),public :: mlrad_params
   
 contains
 
@@ -51,12 +51,12 @@ contains
     
     ! Include the zeroth pft index for air
     
-    allocate(rad_params%rhol(0:n_pft,numrad))
-    allocate(rad_params%rhos(0:n_pft,numrad))
-    allocate(rad_params%taul(0:n_pft,numrad))
-    allocate(rad_params%taus(0:n_pft,numrad))
-    allocate(rad_params%xl(0:n_pft))
-    allocate(rad_params%clump_fac(0:n_pft))
+    allocate(mlrad_params%rhol(0:n_pft,numrad))
+    allocate(mlrad_params%rhos(0:n_pft,numrad))
+    allocate(mlrad_params%taul(0:n_pft,numrad))
+    allocate(mlrad_params%taus(0:n_pft,numrad))
+    allocate(mlrad_params%xl(0:n_pft))
+    allocate(mlrad_params%clump_fac(0:n_pft))
 
   end subroutine AllocateMLSolarParams
   
@@ -174,8 +174,8 @@ contains
           do ib = 1, numrad
              select case (leaf_optics_type)
              case (0)
-                 rho(p,ic,ib) = max(rad_params%rhol(pft(fp),ib)*wl + rad_params%rhos(pft(fp),ib)*ws, 1.e-06_r8)
-                 tau(p,ic,ib) = max(rad_params%taul(pft(fp),ib)*wl + rad_params%taus(pft(fp),ib)*ws, 1.e-06_r8)
+                 rho(p,ic,ib) = max(mlrad_params%rhol(pft(fp),ib)*wl + mlrad_params%rhos(pft(fp),ib)*ws, 1.e-06_r8)
+                 tau(p,ic,ib) = max(mlrad_params%taul(pft(fp),ib)*wl + mlrad_params%taus(pft(fp),ib)*ws, 1.e-06_r8)
               case (1)
                 call endrun (msg=' ERROR: SolarRadiation: need to specify vertical profile for rho & tau')
              end select
@@ -186,7 +186,7 @@ contains
 
           select case (leaf_optics_type)
           case (0)
-             chil(p,ic) = rad_params%xl(pft(fp))
+             chil(p,ic) = mlrad_params%xl(pft(fp))
           case (1)
              call endrun (msg=' ERROR: SolarRadiation: need to specify vertical profile for chil')
           end select
@@ -211,7 +211,7 @@ contains
 
           select case (leaf_optics_type)
           case (0)
-             clump_fac_ic(p,ic) = rad_params%clump_fac(pft(fp))
+             clump_fac_ic(p,ic) = mlrad_params%clump_fac(pft(fp))
           case (1)
              call endrun (msg=' ERROR: SolarRadiation: need to specify vertical profile for clump_fac')
           end select

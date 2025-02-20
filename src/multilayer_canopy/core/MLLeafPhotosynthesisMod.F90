@@ -28,7 +28,7 @@ module MLLeafPhotosynthesisMod
   !-----------------------------------------------------------------------
   
   
-  type, public :: photo_params_type
+  type, public :: mlphoto_params_type
      integer(r8), allocatable :: c3psn(:)     ! Photosynthetic pathway (1 = C3 plant, 0 = C4 plant)
      real(r8), allocatable :: g0_BB(:)     ! Ball-Berry minimum leaf conductance (mol H2O/m2/s)
      real(r8), allocatable :: g1_BB(:)     ! Ball-Berry slope of conductance-photosynthesis relationship
@@ -38,9 +38,9 @@ module MLLeafPhotosynthesisMod
      real(r8), allocatable :: shape_gs(:)  ! Shape parameter for stomatal conductance in relation to leaf water potential (-)
      real(r8), allocatable :: gsmin_SPA(:) ! Minimum stomatal conductance (mol H2O/m2/s)
      real(r8), allocatable :: iota_SPA(:)  ! Stomatal water-use efficiency (umol CO2/ mol H2O)
-  end type photo_params_type
+  end type mlphoto_params_type
   
-  type(photo_params_type),public :: photo_params
+  type(mlphoto_params_type),public :: mlphoto_params
   
 contains
 
@@ -49,15 +49,15 @@ contains
       
     integer,intent(in) :: n_pft
     
-    allocate(photo_params%c3psn(0:n_pft)) 
-    allocate(photo_params%g0_BB(0:n_pft))
-    allocate(photo_params%g1_BB(0:n_pft))
-    allocate(photo_params%g0_MED(0:n_pft))
-    allocate(photo_params%g1_MED(0:n_pft))
-    allocate(photo_params%psi50_ps(0:n_pft))
-    allocate(photo_params%shape_gs(0:n_pft))
-    allocate(photo_params%gsmin_SPA(0:n_pft))
-    allocate(photo_params%ioto_SPA(0:n_pft))
+    allocate(mlphoto_params%c3psn(0:n_pft)) 
+    allocate(mlphoto_params%g0_BB(0:n_pft))
+    allocate(mlphoto_params%g1_BB(0:n_pft))
+    allocate(mlphoto_params%g0_MED(0:n_pft))
+    allocate(mlphoto_params%g1_MED(0:n_pft))
+    allocate(mlphoto_params%psi50_ps(0:n_pft))
+    allocate(mlphoto_params%shape_gs(0:n_pft))
+    allocate(mlphoto_params%gsmin_SPA(0:n_pft))
+    allocate(mlphoto_params%ioto_SPA(0:n_pft))
     
 
   end subroutine AllocateMLPhotoParams
@@ -190,14 +190,14 @@ contains
 
     associate ( &
                                                     ! *** Input ***
-    c3psn     => photo_params%c3psn                  , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
-    g0_BB     => photo_params%g0_BB                  , &  ! CLMml: Ball-Berry minimum leaf conductance (mol H2O/m2/s)
-    g1_BB     => photo_params%g1_BB                  , &  ! CLMml: Ball-Berry slope of conductance-photosynthesis relationship
-    g0_MED    => photo_params%g0_MED                 , &  ! CLMml: Medlyn minimum leaf conductance (mol H2O/m2/s)
-    g1_MED    => photo_params%g1_MED                 , &  ! CLMml: Medlyn slope of conductance-photosynthesis relationship
-    psi50_gs  => photo_params%psi50_gs               , &  ! CLMml: Leaf water potential at which 50% of stomatal conductance is lost (MPa)
-    shape_gs  => photo_params%shape_gs               , &  ! CLMml: Shape parameter for stomatal conductance in relation to leaf water potential (-)
-    gsmin_SPA => photo_params%gsmin_SPA              , &  ! CLMml: Minimum stomatal conductance (mol H2O/m2/s)
+    c3psn     => mlphoto_params%c3psn                  , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
+    g0_BB     => mlphoto_params%g0_BB                  , &  ! CLMml: Ball-Berry minimum leaf conductance (mol H2O/m2/s)
+    g1_BB     => mlphoto_params%g1_BB                  , &  ! CLMml: Ball-Berry slope of conductance-photosynthesis relationship
+    g0_MED    => mlphoto_params%g0_MED                 , &  ! CLMml: Medlyn minimum leaf conductance (mol H2O/m2/s)
+    g1_MED    => mlphoto_params%g1_MED                 , &  ! CLMml: Medlyn slope of conductance-photosynthesis relationship
+    psi50_gs  => mlphoto_params%psi50_gs               , &  ! CLMml: Leaf water potential at which 50% of stomatal conductance is lost (MPa)
+    shape_gs  => mlphoto_params%shape_gs               , &  ! CLMml: Shape parameter for stomatal conductance in relation to leaf water potential (-)
+    gsmin_SPA => mlphoto_params%gsmin_SPA              , &  ! CLMml: Minimum stomatal conductance (mol H2O/m2/s)
     tacclim   => mlcanopy_inst%tacclim_forcing , &  ! Average air temperature for acclimation (K)
     ncan      => mlcanopy_inst%ncan_canopy     , &  ! Number of aboveground layers
     dpai      => mlcanopy_inst%dpai_profile    , &  ! Canopy layer plant area index (m2/m2)
@@ -535,7 +535,7 @@ contains
 
     associate ( &
                                                   ! *** Input ***
-    c3psn     => photo_params%c3psn                , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
+    c3psn     => mlphoto_params%c3psn                , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
     o2ref     => mlcanopy_inst%o2ref_forcing , &  ! Atmospheric O2 at reference height (mmol/mol)
     g0        => mlcanopy_inst%g0_canopy     , &  ! Ball-Berry or Medlyn minimum leaf conductance (mol H2O/m2/s)
     g1        => mlcanopy_inst%g1_canopy     , &  ! Ball-Berry or Medlyn slope parameter
@@ -752,7 +752,7 @@ contains
 
     associate ( &
                                                ! *** Input ***
-    c3psn  => photo_params%c3psn                , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
+    c3psn  => mlphoto_params%c3psn                , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
     o2ref  => mlcanopy_inst%o2ref_forcing , &  ! Atmospheric O2 at reference height (mmol/mol)
     dpai   => mlcanopy_inst%dpai_profile  , &  ! Canopy layer plant area index (m2/m2)
     cair   => mlcanopy_inst%cair_profile  , &  ! Canopy layer atmospheric CO2 (umol/mol)
@@ -930,7 +930,7 @@ contains
     !---------------------------------------------------------------------
 
     associate ( &
-    gsmin_SPA => photo_params%gsmin_SPA              , &  ! CLMml: Minimum stomatal conductance (mol H2O/m2/s)
+    gsmin_SPA => mlphoto_params%gsmin_SPA              , &  ! CLMml: Minimum stomatal conductance (mol H2O/m2/s)
     dpai      => mlcanopy_inst%dpai_profile    , &  ! Canopy layer plant area index (m2/m2)
     ci        => mlcanopy_inst%ci_leaf         , &  ! Leaf intercellular CO2
     gs        => mlcanopy_inst%gs_leaf           &  ! Leaf stomatal conductance (mol H2O/m2 leaf/s)
@@ -1014,7 +1014,7 @@ contains
     !---------------------------------------------------------------------
 
     associate ( &
-    iota_SPA    => photo_params%iota_SPA              , &  ! CLMml: Stomatal water-use efficiency (umol CO2/ mol H2O)
+    iota_SPA    => mlphoto_params%iota_SPA              , &  ! CLMml: Stomatal water-use efficiency (umol CO2/ mol H2O)
     pref        => mlcanopy_inst%pref_forcing   , &  ! Air pressure at reference height (Pa)
     eair        => mlcanopy_inst%eair_profile   , &  ! Canopy layer vapor pressure (Pa)
     gbv         => mlcanopy_inst%gbv_leaf       , &  ! Leaf boundary layer conductance: H2O (mol H2O/m2 leaf/s)

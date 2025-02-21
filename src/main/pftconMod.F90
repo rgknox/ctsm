@@ -1580,6 +1580,7 @@ contains
           end do
           mlrad_params%xl(i)        = this%xl(i)
           mlrad_params%clump_fac(i) = this%clump_fac(i)
+          
           mlphoto_params%c3psn(i)  =  int(this%c3psn(i))
           mlphoto_params%g0_BB(i)  =  this%g0_BB(i)
           mlphoto_params%g1_BB(i)  =  this%g1_BB(i)
@@ -1589,6 +1590,8 @@ contains
           mlphoto_params%shape_gs(i)  = this%shape_gs(i)
           mlphoto_params%gsmin_SPA(i) = this%gsmin_SPA(i)
           mlphoto_params%ioto_SPA(i)  = this%ioto_SPA(i)
+
+          mlhydro_params%capac_SPA(i)  = this%capac_SPA(i)
           mlhydro_params%gplant_SPA(i)  = this%gplant_SPA(i)
           mlhydro_params%root_radius_SPA(i)  = this%root_radius_SPA(i)
           mlhydro_params%root_density_SPA(i)  = this%root_density_SPA(i)

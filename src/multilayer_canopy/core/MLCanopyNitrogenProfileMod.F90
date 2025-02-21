@@ -5,8 +5,8 @@ module MLCanopyNitrogenProfileMod
   ! Canopy profile of nitrogen and photosynthetic capacity
   !
   ! !USES:
-  use abortutils, only : endrun
-  use clm_varctl, only : iulog
+  use MLCanopyVarCtl, only : endrun
+  use MLCanopyVarPar, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
   ! !PUBLIC TYPES:
@@ -25,7 +25,7 @@ module MLCanopyNitrogenProfileMod
     ! Canopy profile of nitrogen and photosynthetic capacity
     !
     ! !USES:
-    use clm_varcon, only : tfrz
+    use MLCanopyVarCon, only : tfrz
     use PatchType, only : patch
     use pftconMod, only : pftcon
     use MLCanopyVarCon, only : jmax25_to_vcmax25_noacclim, jmax25_to_vcmax25_acclim

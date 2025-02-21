@@ -5,10 +5,11 @@ module MLinitVerticalMod
   ! Initialize multilayer canopy vertical structure and profiles
   !
   ! !USES:
-  use abortutils, only : endrun
-  use clm_varctl, only : iulog
-  use decompMod, only : bounds_type
+  use abortutils,   only : endrun
+  use clm_varctl,   only : iulog
+  use decompMod,    only : bounds_type
   use shr_kind_mod, only : r8 => shr_kind_r8
+  use clm_varpar,   only : nlevgrnd
   !
   ! !PUBLIC TYPES:
   implicit none
@@ -50,6 +51,7 @@ contains
     ! !LOCAL VARIABLES:
     integer  :: fp                               ! Filter index
     integer  :: p                                ! Patch index for CLM g/l/c/p hierarchy
+    integer  :: c                                ! Column index for CLM g/l/c/p hierarchy
     integer  :: ic                               ! Aboveground layer index
     integer  :: iflag                            ! Error flag
     real(r8) :: ztop_to_zref                     ! Atmospheric reference height - canopy height (m)
@@ -91,12 +93,19 @@ contains
     dz          => mlcanopy_inst%dz_profile          , &  ! Canopy layer thickness (m)
     dleaf_prof  => mlcanopy_inst%dleaf_profile       , &  ! Mean leaf width over canopy (constant value, set to pftcon)
     sla_prof    => mlcanopy_inst%sla_profile         , &  ! Mean specific leaf area over canopy layers (m2/g)
-    emleaf_prof => mlcanopy_inst%emleaf_profile        &  ! Mean leaf LW emissivity over canopy layers
+    emleaf_prof => mlcanopy_inst%emleaf_profile      , &  ! Mean leaf LW emissivity over canopy layers
+    nsoil       => mlcanopy_inst%nsoil               , &  ! Number of soil layers on each patch
+    soil_dz     => mlcanopy_inst%soil_dz             , &  ! Soil layer thickness (m)
+    soil_smp    => mlcanopy_inst%soil_smp            , &  ! Soil layer matric potential (mm)
+    soil_hk     => mlcanopy_inst%soil_hk             , &  ! Soil layer hydraulic conductivity (mm H2O/s)
+    soil_rootf  => mlcanopy_inst%soil_rootf          , &  ! Fraction of roots in each layer
+    soil_ice    => mlcanopy_inst%soil_ice              &  ! Soil layer ice lens (kg H2O/m2)
     )
 
-    do fp = 1, num_filter
+    do_fp: do fp = 1, num_filter
        p = filter(fp)
-
+       c = patch%column(p)
+       
        ! Atmospheric forcing height
 
        zref(p) = forc_hgt_u(p)
@@ -344,8 +353,19 @@ contains
 
        end do
 
+       ! Update pointers to input soil conditions
+
+       nsoil(p) => col%nbedrock(c)
+       do j = 1, nlevgrnd
+          soil_dz(p,j)    => col%dz(c,j)
+          soil_smp(p,j)   => soilstate_inst%smp_l_col(c,j)
+          soil_hk(p,j)    => soilstate_inst%hk_l_col(c,j)
+          soil_rootf(p,j) => soilstate_inst%rootfr_patch(p,j)
+          soil_ice(p,j)   => waterstatebulk_inst%h2osoi_ice_col(c,j)
+       end do
        
-    end do
+       
+    end do do_fp
 
     end associate
   end subroutine initVerticalStructure

@@ -440,8 +440,7 @@ module MLCanopyDriverMod
 
     ! Plant hydraulics
 
-    call SoilResistance (num_mlcan, filter_mlcan, &
-    soilstate_inst, waterstatebulk_inst, mlcanopy_inst, pft_mlcan)
+    call SoilResistance (num_mlcan, filter_mlcan, mlcanopy_inst, pft_mlcan)
 
     call PlantResistance (num_mlcan, filter_mlcan, mlcanopy_inst, pft_mlcan)
 

@@ -9,7 +9,7 @@ module MLCanopyFluxesType
   use MLCanopyVarCon, only : ispval, spval
   use MLCanopyVarPar, only : nlevgrnd, numrad
   use shr_kind_mod, only : r8 => shr_kind_r8
-  use MLCanopyVarPar, only : nlevmlcan, nleaf
+  use MLCanopyVarPar, only : nlevmlcan, nleaf, nlevgrnd
   !
   ! !PUBLIC TYPES:
   implicit none
@@ -39,7 +39,19 @@ module MLCanopyFluxesType
                                  ! which of these canopy sites are
                                  ! active.
     integer         :: nfilter
-     
+
+    
+    
+    
+    ! Soil input variables: dimension is (patch x nlevgrnd)
+    
+    integer,  pointer :: nsoil(:)        ! Number of soil layers on each patch
+    real(r8), pointer :: soil_dz(:,:)    ! Soil layer thickness (m)
+    real(r8), pointer :: soil_smp(:,:)   ! Soil layer matric potential (mm)
+    real(r8), pointer :: soil_hk(:,:)    ! Soil layer hydraulic conductivity (mm H2O/s)
+    real(r8), pointer :: soil_rootf(:,:) ! Fraction of roots in each layer
+    real(r8), pointer :: soil_ice(:,:)   ! Soil layer ice lens (kg H2O/m2)
+    
     ! Vegetation input variables: dimension is (patch)
 
     real(r8), pointer :: ztop_canopy(:)          ! Canopy foliage top height (m)
@@ -376,6 +388,16 @@ contains
     begp = this%begp ; endp = this%endp
 
     allocate (this%filter              (begp:endp))                              ; this%filter              (:)       = ispval
+
+
+    ! Soil input variables
+    
+    allocate (this%nsoil(begp:endp))                                             ; this%nsoil               (:)   = ispval
+    allocate (this%soil_dz   (begp:endp,nlevgrnd))                               ; this%soil_dz             (:,:) = spval
+    allocate (this%soil_smp  (begp:endp,nlevgrnd))                               ; this%soil_smp            (:,:) = spval
+    allocate (this%soil_hk   (begp:endp,nlevgrnd))                               ; this%soil_hk             (:,:) = spval
+    allocate (this%soil_rootf(begp:endp,nlevgrnd))                               ; this%soil_rootf          (:,:) = spval
+    allocate (this%soil_ice  (begp:endp,nlevgrnd))                               ; this%soil_ice            (:,:) = spval
     
     ! Vegetation input variables
 

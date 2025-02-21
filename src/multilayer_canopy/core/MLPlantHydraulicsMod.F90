@@ -5,8 +5,8 @@ module MLPlantHydraulicsMod
   ! Calculate plant hydraulics
   !
   ! !USES:
-  use abortutils, only : endrun
-  use clm_varctl, only : iulog
+  use MLCanopyVarCtl, only : endrun
+  use MLCanopyVarPar, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
   ! !PUBLIC TYPES:
@@ -68,7 +68,7 @@ contains
 
     associate ( &
                                                   ! *** Input ***
-    gplant_SPA => mlhydro_params%gplant_SPA          , &  ! CLMml: Stem (xylem-to-leaf) hydraulic conductance (mmol H2O/m2 leaf area/s/MPa)
+    gplant_SPA => mlhydro_params%gplant_SPA  , &  ! CLMml: Stem (xylem-to-leaf) hydraulic conductance (mmol H2O/m2 leaf area/s/MPa)
     ncan       => mlcanopy_inst%ncan_canopy  , &  ! Number of aboveground layers
     rsoil      => mlcanopy_inst%rsoil_soil   , &  ! Soil hydraulic resistance (MPa.s.m2/mmol H2O)
     dpai       => mlcanopy_inst%dpai_profile , &  ! Canopy layer plant area index (m2/m2)
@@ -105,35 +105,27 @@ contains
   end subroutine PlantResistance
 
   !-----------------------------------------------------------------------
-  subroutine SoilResistance (num_filter, filter, &
-  soilstate_inst, waterstatebulk_inst, mlcanopy_inst, pft)
+  subroutine SoilResistance (num_filter, filter, mlcanopy_inst, pft)
     !
     ! !DESCRIPTION:
     ! Calculate soil hydraulic resistance and water uptake from each soil layer
     ! 
     ! !USES:
-    use clm_varcon, only : pi => rpi, denh2o, grav
-    use clm_varpar, only : nlevsoi
-    use ColumnType, only : col
+    use MLCanopyVarCon, only : pi => rpi, denh2o, grav
+    use MLCanopyVarPar, only : nlevsoi
     use MLCanopyVarCon, only : mmh2o
-    use SoilStateType, only : soilstate_type
-    use WaterStateBulkType, only : waterstatebulk_type
     use MLCanopyFluxesType, only : mlcanopy_type
     !
     ! !ARGUMENTS:
     implicit none
     integer, intent(in) :: num_filter            ! Number of patches in filter
     integer, intent(in) :: filter(:)             ! Patch filter
-
-    type(soilstate_type), intent(in) :: soilstate_inst
-    type(waterstatebulk_type), intent(in) :: waterstatebulk_inst
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
-    integer, intent(in) :: pft(:)                         ! plant functional type associated with the filter index (patch)
+    integer, intent(in) :: pft(:)                ! plant functional type associated with the filter index (patch)
     !
     ! !LOCAL VARIABLES:
     integer  :: fp                               ! Filter index
     integer  :: p                                ! Patch index for CLM g/l/c/p hierarchy
-    integer  :: c                                ! Column index for CLM g/l/c/p hierarchy
     integer  :: j                                ! Soil layer index
     integer  :: nlayers                          ! Number of layers
     real(r8) :: head                             ! Head of pressure  (MPa/m)
@@ -152,22 +144,22 @@ contains
     !---------------------------------------------------------------------
 
     associate ( &
-                                                               ! *** Input ***
-    root_radius_SPA  => mlhydro_params%root_radius_SPA            , &  ! CLMml: Fine root radius (m)
-    root_density_SPA => mlhydro_params%root_density_SPA           , &  ! CLMml: Fine root density (g biomass / m3 root)
-    root_resist_SPA  => mlhydro_params%root_resist_SPA            , &  ! CLMml: Hydraulic resistivity of root tissue (MPa.s.g/mmol H2O)
-    dz               => col%dz                            , &  ! CLM: Soil layer thickness (m)
-    nbedrock         => col%nbedrock                      , &  ! Depth to bedrock index
-    smp_l            => soilstate_inst%smp_l_col          , &  ! CLM: Soil layer matric potential (mm)
-    hk_l             => soilstate_inst%hk_l_col           , &  ! CLM: Soil layer hydraulic conductivity (mm H2O/s)
-    rootfr           => soilstate_inst%rootfr_patch       , &  ! CLM: Fraction of roots in each soil layer
-    h2osoi_ice       => waterstatebulk_inst%h2osoi_ice_col, &  ! CLM: Soil layer ice lens (kg H2O/m2)
-    lai              => mlcanopy_inst%lai_canopy          , &  ! Leaf area index of canopy (m2/m2)
-    root_biomass     => mlcanopy_inst%root_biomass_canopy , &  ! Fine root biomass (g biomass / m2)
-                                                               ! *** Output ***
-    psis             => mlcanopy_inst%psis_soil           , &  ! Weighted soil water potential (MPa)
-    rsoil            => mlcanopy_inst%rsoil_soil          , &  ! Soil hydraulic resistance (MPa.s.m2/mmol H2O)
-    soil_et_loss     => mlcanopy_inst%soil_et_loss_soil     &  ! Fraction of total transpiration from each soil layer (-)
+                                                              ! *** Input ***
+    root_radius_SPA  => mlhydro_params%root_radius_SPA    , & ! CLMml: Fine root radius (m)
+    root_density_SPA => mlhydro_params%root_density_SPA   , & ! CLMml: Fine root density (g biomass / m3 root)
+    root_resist_SPA  => mlhydro_params%root_resist_SPA    , & ! CLMml: Hydraulic resistivity of root tissue (MPa.s.g/mmol H2O)
+    dz               => mlcanopy_inst%soil_dz             , & ! Soil layer thickness (m)
+    nbedrock         => mlcanopy_inst%nsoil               , & ! Depth to bedrock index
+    smp_l            => mlcanopy_inst%soil_smp            , & ! Soil layer matric potential (mm)
+    hk_l             => mlcanopy_inst%soil_hk             , & ! Soil layer hydraulic conductivity (mm H2O/s)
+    rootfr           => mlcanopy_inst%soil_rootfr         , & ! Fraction of roots in each soil layer
+    h2osoi_ice       => mlcanopy_inst%soil_ice            , & ! Soil layer ice lens (kg H2O/m2)
+    lai              => mlcanopy_inst%lai_canopy          , & ! Leaf area index of canopy (m2/m2)
+    root_biomass     => mlcanopy_inst%root_biomass_canopy , & ! Fine root biomass (g biomass / m2)
+                                                              ! *** Output ***
+    psis             => mlcanopy_inst%psis_soil           , & ! Weighted soil water potential (MPa)
+    rsoil            => mlcanopy_inst%rsoil_soil          , & ! Soil hydraulic resistance (MPa.s.m2/mmol H2O)
+    soil_et_loss     => mlcanopy_inst%soil_et_loss_soil     & ! Fraction of total transpiration from each soil layer (-)
     )
 
     head = denh2o * grav * 1.e-06_r8
@@ -176,11 +168,10 @@ contains
 
     do fp = 1, num_filter
        p = filter(fp)
-       c = patch%column(p)
 
        ! Set number of hydrologically active soil layers
 
-       nlayers = nbedrock(c)
+       nlayers = nbedrock(p)
 
        ! Root cross-sectional area
 
@@ -194,13 +185,13 @@ contains
 
           ! Hydraulic conductivity and matric potential for each layer
 
-          hk = hk_l(c,j) * (1.e-03_r8 / head)                       ! mm/s -> m/s -> m2/s/MPa
+          hk = hk_l(p,j) * (1.e-03_r8 / head)                       ! mm/s -> m/s -> m2/s/MPa
           hk = hk * denh2o / mmh2o * 1000._r8                       ! m2/s/MPa -> mmol/m/s/MPa
-          smp_mpa(j) = smp_l(c,j) * 1.e-03_r8 * head                ! mm -> m -> MPa
+          smp_mpa(j) = smp_l(p,j) * 1.e-03_r8 * head                ! mm -> m -> MPa
 
           ! Root biomass density: g biomass / m3 soil
 
-          root_biomass_density = root_biomass(p) * rootfr(p,j) / dz(c,j)
+          root_biomass_density = root_biomass(p) * rootfr(p,j) / dz(p,j)
           root_biomass_density = max(root_biomass_density, 1.e-10_r8)
 
           ! Root length density: m root per m3 soil
@@ -213,11 +204,11 @@ contains
 
           ! Soil-to-root resistance (MPa.s.m2/mmol H2O)
 
-          soilr1 = log(root_dist/root_radius_SPA(pft(fp))) / (2._r8 * pi * root_length_density * dz(c,j) * hk)
+          soilr1 = log(root_dist/root_radius_SPA(pft(fp))) / (2._r8 * pi * root_length_density * dz(p,j) * hk)
 
           ! Root-to-stem resistance (MPa.s.m2/mmol H2O)
 
-          soilr2 = root_resist_SPA(pft(fp)) / (root_biomass_density * dz(c,j))
+          soilr2 = root_resist_SPA(pft(fp)) / (root_biomass_density * dz(p,j))
 
           ! Belowground resistance (MPa.s.m2/mmol H2O) 
 
@@ -234,7 +225,7 @@ contains
 
           evap(j) = (smp_mpa(j) - minlwp_SPA) / soilr
           evap(j) = max (evap(j), 0._r8)
-          if (h2osoi_ice(c,j) > 0._r8) evap(j) = 0._r8
+          if (h2osoi_ice(p,j) > 0._r8) evap(j) = 0._r8
           totevap = totevap + evap(j)
 
        end do
@@ -275,7 +266,7 @@ contains
     ! Calculate leaf water potential
     !
     ! !USES:
-    use clm_varcon, only : denh2o, grav
+    use MLCanopyVarCon, only : denh2o, grav
     use MLCanopyVarCtl, only : dtime_substep
     use MLCanopyFluxesType, only : mlcanopy_type
     !

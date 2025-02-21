@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<all>
+
+    this%shape_gs(1:16) = 40._r8
+
+    ! Leaf emissivity
+
+    this%emleaf(:) = -999._r8
+    this%emleaf(1:16) = 0.98_r8
+
+    ! Foliage clumping index
+
+    this%clump_fac(:) = -999._r8
+    this%clump_fac(1:16) = 1._r8
+    
+  <!-- Parameters for ML canopy unit tests -->
+
+  <!-- Number of PFTs *Note we do not include a zero index for bare-ground
+       these unit tests are only for vegetated lands -->
+  
+  <numpft> 16 </numpft>
+
+  <!-- Values applied to MLCanopy Parameter arrays
+       mlrad_params%  mlphoto_params% and mlhydro_params% -->
+
+  <f90_params>
+    <pft_dim>
+
+      <mlrad_params>
+	<param name='xl'> 0.01, 0.01, 0.01, 0.32,  0.32, 0.2, 0.59, 0.59,  0.32, 0.59, 0.59, -0.23,  -0.23, -0.23, 0.3, 0.3 </param>
+	<param name='clump_fac'> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 </param>
+	<param name='rholnir'>0.41, 0.41, 0.39, 0.46, 0.46, 0.41, 0.41, 0.41, 0.46, 0.41, 0.41, 0.28, 0.28, 0.28, 0.42, 0.42 </param>
+	<param name='rholvis'>0.09, 0.09, 0.08, 0.11, 0.11, 0.08, 0.08, 0.08, 0.11, 0.08, 0.08, 0.05, 0.05, 0.05, 0.08, 0.08 </param>
+	<param name='taulnir'>0.32, 0.32, 0.42, 0.33, 0.33, 0.43, 0.43, 0.43, 0.33, 0.43, 0.43, 0.4,  0.4,  0.4,  0.4,  0.4  </param>
+	<param name='taulvis'>0.04, 0.04, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.05, 0.05 </param>	
+      </mlrad_params>
+
+      <mlphoto_params>
+	<param name='c3psn'> 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 0, 1, 1 </param>
+        <param name='g0_BB'> 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.04, 0.01, 0.01 </param>
+	<param name='g1_BB'> 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 4, 9, 9 </param>
+	<param name='g0_MED'> 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, </param>
+        <param name='g1_MED'> 2.35, 2.35, 2.35, 4.12, 4.12, 4.45, 4.45, 4.45, 4.70, 4.70, 4.70, 2.22, 5.25, 1.62, 5.79, 5.79 </param>
+        <param name='psi50_ps'> -2.3, -2.3, -2.3, -2.3, -2.3, -2.3, -2.3, -2.3, -2.3, -2.3, -2.3, -2.3, -2.3, -2.3, -2.3, -2.3, </param>
+        <param name='shape_gs'> 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40 </param>
+        <param name='gsmin_SPA'> 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, </param>
+	<param name='ioto_SPA'> 750, 1500, 1500, 500, 750, 750, 750, 750, 750, 750, 750, 750, 750, 750, 750, 750 </param>
+      </mlphoto_params>
+      
+      <mlhydro_params>
+	<param name='capac_SPA'> 2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500, 500, 500, 500, 500, 500 </param>
+	<param name='gplant_SPA'> 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 </param>
+	<param name='root_radius_SPA'> 0.00029, 0.00029, 0.00029, 0.00029, 0.00029, 0.00029, 0.00029, 0.00029,
+	                               0.00029, 0.00029, 0.00029, 0.00029, 0.00029, 0.00029, 0.00029, 0.00029 </param>
+	<param name='root_density_SPA'> 3.1e5, 3.1e5, 3.1e5, 3.1e5, 3.1e5, 3.1e5, 3.1e5, 3.1e5,
+	                                3.1e5, 3.1e5, 3.1e5, 3.1e5, 3.1e5, 3.1e5, 3.1e5, 3.1e5 </param>
+	<param name='root_resist_SPA'> 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 </param>
+      </mlhydro_params>
+      
+    </pft_dim>
+    <scalar_dim>
+      <param name=' '>1</param>
+    </scalar_dim>
+  </f90_params>
+
+  <!-- Values applied to global constants in VarCon VarPar VarCtl -->
+
+  <f90_globals>
+  </f90_globals>
+  
+  <!-- Values applied to parameters that are outside the 
+       perview of MLCanopy Fortran Code, and therefore used on the python
+       side of things, such as root depth controls -->
+
+  <py_params>
+    <pft_dim>
+      <param name='pftname'>
+	needleleaf_evergreen_temperate_tree,
+	needleleaf_evergreen_boreal_tree,
+	needleleaf_deciduous_boreal_tree,
+	broadleaf_evergreen_tropical_tree,
+	broadleaf_evergreen_temperate_tree,
+	broadleaf_deciduous_tropical_tree,
+	broadleaf_deciduous_temperate_tree,
+	broadleaf_deciduous_boreal_tree,
+	broadleaf_evergreen_shrub,
+	broadleaf_deciduous_temperate_shrub,
+	broadleaf_deciduous_boreal_shrub,
+	c3_arctic_grass,
+	c3_non-arctic_grass,
+	c4_grass,
+	c3_crop,
+	c3_irrigated</param>
+	<param name='emleaf'> 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98 </param>
+	<param name='dleaf'>  0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04 </param>
+    </pft_dim>
+  </py_params>
+</all>

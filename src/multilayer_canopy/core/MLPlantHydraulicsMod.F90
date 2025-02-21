@@ -20,6 +20,7 @@ module MLPlantHydraulicsMod
   !-----------------------------------------------------------------------
 
   type, public :: mlhydro_params_type
+     real(r8), allocatable :: capac_SPA        (:) ! Plant capacitance (mmol H2O/m2 leaf area/MPa)
      real(r8), allocatable :: gplant_SPA       (:) ! Stem (xylem-to-leaf) hydraulic conductance (mmol H2O/m2 leaf area/s/MPa)
      real(r8), allocatable :: root_radius_SPA  (:) ! Fine root radius (m)
      real(r8), allocatable :: root_density_SPA (:) ! Fine root density (g biomass / m3 root)
@@ -291,7 +292,7 @@ contains
 
     associate ( &
                                                    ! *** Input ***
-    capac_SPA   => mlhydro_params%capac_SPA           , &  ! CLMml: Plant capacitance (mmol H2O/m2 leaf area/MPa)
+    capac_SPA   => mlhydro_params%capac_SPA   , &  ! Plant capacitance (mmol H2O/m2 leaf area/MPa)
     ncan        => mlcanopy_inst%ncan_canopy  , &  ! Number of aboveground layers
     psis        => mlcanopy_inst%psis_soil    , &  ! Weighted soil water potential (MPa)
     dpai        => mlcanopy_inst%dpai_profile , &  ! Canopy layer plant area index (m2/m2)

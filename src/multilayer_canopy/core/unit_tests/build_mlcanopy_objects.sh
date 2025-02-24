@@ -34,8 +34,8 @@ ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLWaterVaporMod.o ../src/MLWater
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLLeafFluxesMod.o ../src/MLLeafFluxesMod.F90
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLSoilFluxesMod.o ../src/MLSoilFluxesMod.F90
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyTurbulenceMod.o ../src/MLCanopyTurbulenceMod.F90
-#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
-#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLLeafHeatCapacityMod.o ../src/MLLeafHeatCapacityMod.F90
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLPlantHydraulicsMod.o ../src/MLPlantHydraulicsMod.F90
 #${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
 
 

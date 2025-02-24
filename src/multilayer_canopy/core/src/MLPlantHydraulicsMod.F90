@@ -113,7 +113,7 @@ contains
     ! 
     ! !USES:
     use MLCanopyVarCon, only : pi => rpi, denh2o, grav
-    use MLCanopyVarPar, only : nlevsoi
+    use MLCanopyVarPar, only : nlevgrnd
     use MLCanopyVarCon, only : mmh2o
     use MLCanopyFluxesType, only : mlcanopy_type
     !
@@ -138,8 +138,8 @@ contains
     real(r8) :: soilr1                           ! Soil-to-root resistance (MPa.s.m2/mmol H2O)
     real(r8) :: soilr2                           ! Root-to-stem resistance (MPa.s.m2/mmol H2O)
     real(r8) :: soilr                            ! Belowground resistance (MPa.s.m2/mmol H2O) 
-    real(r8) :: smp_mpa(nlevsoi)                 ! Soil matric potential (MPa)
-    real(r8) :: evap(nlevsoi)                    ! Maximum transpiration (mmol H2O/m2/s)
+    real(r8) :: smp_mpa(nlevgrnd)                 ! Soil matric potential (MPa)
+    real(r8) :: evap(nlevgrnd)                    ! Maximum transpiration (mmol H2O/m2/s)
     real(r8) :: totevap                          ! Total maximum transpiration (mmol H2O/m2/s)
     real(r8) :: minlwp_SPA = -2._r8              ! Minimum leaf water potential (MPa) - legacy from original SPA implementation
     !---------------------------------------------------------------------
@@ -153,7 +153,7 @@ contains
     nbedrock         => mlcanopy_inst%nsoil               , & ! Depth to bedrock index
     smp_l            => mlcanopy_inst%soil_smp            , & ! Soil layer matric potential (mm)
     hk_l             => mlcanopy_inst%soil_hk             , & ! Soil layer hydraulic conductivity (mm H2O/s)
-    rootfr           => mlcanopy_inst%soil_rootfr         , & ! Fraction of roots in each soil layer
+    rootfr           => mlcanopy_inst%soil_rootf          , & ! Fraction of roots in each soil layer
     h2osoi_ice       => mlcanopy_inst%soil_ice            , & ! Soil layer ice lens (kg H2O/m2)
     lai              => mlcanopy_inst%lai_canopy          , & ! Leaf area index of canopy (m2/m2)
     root_biomass     => mlcanopy_inst%root_biomass_canopy , & ! Fine root biomass (g biomass / m2)

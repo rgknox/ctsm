@@ -11,6 +11,7 @@ module MLCanopyVarCon
   use shr_const_mod, only: SHR_CONST_STEBOL,SHR_CONST_PI
   use shr_const_mod, only: SHR_CONST_CPFW,SHR_CONST_TKFRZ
   use shr_const_mod, only: SHR_CONST_LATVAP,SHR_CONST_LATSUB
+  use shr_const_mod, only: SHR_CONST_RHOFW,SHR_CONST_RHOICE
   !
   ! !PUBLIC TYPES:
   implicit none
@@ -25,6 +26,9 @@ module MLCanopyVarCon
 
   real(r8), public :: hvap   = SHR_CONST_LATVAP                     ! Latent heat of evap for water [J/kg]
   real(r8), public :: hsub   = SHR_CONST_LATSUB                     ! Latent heat of sublimation    [J/kg]
+  real(r8), public :: denh2o = SHR_CONST_RHOFW                      ! density of liquid water [kg/m3]
+  real(r8), public :: denice = SHR_CONST_RHOICE                     ! density of ice [kg/m3]
+
   
   ! Physical constants for multilayer canopy
 

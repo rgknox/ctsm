@@ -10,6 +10,7 @@ module MLCanopyVarCon
   use shr_const_mod, only: SHR_CONST_G,SHR_CONST_KARMAN
   use shr_const_mod, only: SHR_CONST_STEBOL,SHR_CONST_PI
   use shr_const_mod, only: SHR_CONST_CPFW,SHR_CONST_TKFRZ
+  use shr_const_mod, only: SHR_CONST_LATVAP,SHR_CONST_LATSUB
   !
   ! !PUBLIC TYPES:
   implicit none
@@ -21,6 +22,9 @@ module MLCanopyVarCon
   real(r8), public :: pi     = SHR_CONST_PI
   real(r8), public :: cpliq  = SHR_CONST_CPFW                       ! Specific heat of water [J/kg-K]
   real(r8), public, parameter :: tfrz   = SHR_CONST_TKFRZ           ! freezing temperature [K]
+
+  real(r8), public :: hvap   = SHR_CONST_LATVAP                     ! Latent heat of evap for water [J/kg]
+  real(r8), public :: hsub   = SHR_CONST_LATSUB                     ! Latent heat of sublimation    [J/kg]
   
   ! Physical constants for multilayer canopy
 

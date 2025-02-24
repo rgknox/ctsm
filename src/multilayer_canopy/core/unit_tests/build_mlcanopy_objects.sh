@@ -4,7 +4,7 @@
 
 FC='gfortran'
 
-F_OPTS="-shared -fPIC -O3"
+F_OPTS="-shared -fPIC" # -O3"
 
 #F_OPTS="-shared -fPIC -O0 -g -ffpe-trap=zero,overflow,underflow -fbacktrace -fbounds-check -Wall"
 
@@ -22,4 +22,18 @@ ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyVarPar.o ../src/MLCanopy
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyVarCon.o ../src/MLCanopyVarCon.F90
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyVarCtl.o ../src/MLCanopyVarCtl.F90
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyFluxesType.o ../src/MLCanopyFluxesType.F90
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLMathToolsMod.o ../src/MLMathToolsMod.F90
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLWaterVaporMod.o ../src/MLWaterVaporMod.F90
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MlLeafPhotosynthesisMod.o ../src/MLLeafPhotosynthesisMod.F90
+#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLSolarRadiationMod.o ../src/MLSolarRadiationMod.F90
+#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
+#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
+#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
+#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
+#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
+#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
+#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
+#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
+
+
 

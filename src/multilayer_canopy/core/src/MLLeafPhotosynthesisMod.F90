@@ -29,7 +29,7 @@ module MLLeafPhotosynthesisMod
   
   
   type, public :: mlphoto_params_type
-     integer(r8), allocatable :: c3psn(:)  ! Photosynthetic pathway (1 = C3 plant, 0 = C4 plant)
+     real(r8), allocatable :: c3psn(:)  ! Photosynthetic pathway (1 = C3 plant, 0 = C4 plant)
      real(r8), allocatable :: vcmaxpft(:)  ! Maximum carboxylation rate at 25C (umol/m2/s)
      real(r8), allocatable :: g0_BB(:)     ! Ball-Berry minimum leaf conductance (mol H2O/m2/s)
      real(r8), allocatable :: g1_BB(:)     ! Ball-Berry slope of conductance-photosynthesis relationship
@@ -56,10 +56,10 @@ contains
     allocate(mlphoto_params%g1_BB(0:n_pft))
     allocate(mlphoto_params%g0_MED(0:n_pft))
     allocate(mlphoto_params%g1_MED(0:n_pft))
-    allocate(mlphoto_params%psi50_ps(0:n_pft))
+    allocate(mlphoto_params%psi50_gs(0:n_pft))
     allocate(mlphoto_params%shape_gs(0:n_pft))
     allocate(mlphoto_params%gsmin_SPA(0:n_pft))
-    allocate(mlphoto_params%ioto_SPA(0:n_pft))
+    allocate(mlphoto_params%iota_SPA(0:n_pft))
     
 
   end subroutine AllocateMLPhotoParams
@@ -1016,7 +1016,7 @@ contains
     !---------------------------------------------------------------------
 
     associate ( &
-    iota_SPA    => mlphoto_params%iota_SPA              , &  ! CLMml: Stomatal water-use efficiency (umol CO2/ mol H2O)
+    iota_SPA    => mlphoto_params%iota_SPA      , &  ! Stomatal water-use efficiency (umol CO2/ mol H2O)
     pref        => mlcanopy_inst%pref_forcing   , &  ! Air pressure at reference height (Pa)
     eair        => mlcanopy_inst%eair_profile   , &  ! Canopy layer vapor pressure (Pa)
     gbv         => mlcanopy_inst%gbv_leaf       , &  ! Leaf boundary layer conductance: H2O (mol H2O/m2 leaf/s)
@@ -1078,6 +1078,7 @@ contains
 
     associate ( &
                                                   ! *** Input ***
+    c3psn     => mlphoto_params%c3psn        , &  ! C3/C4 flag
     dpai      => mlcanopy_inst%dpai_profile  , &  ! Canopy layer plant area index (m2/m2)
     cair      => mlcanopy_inst%cair_profile  , &  ! Canopy layer atmospheric CO2 (umol/mol)
     apar      => mlcanopy_inst%apar_leaf     , &  ! Leaf absorbed PAR (umol photon/m2 leaf/s)

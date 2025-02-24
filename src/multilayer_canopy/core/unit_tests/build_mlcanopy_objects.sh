@@ -21,16 +21,19 @@ ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/shr_sys_mod.o share/shr_sys_mod.
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyVarPar.o ../src/MLCanopyVarPar.F90
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyVarCon.o ../src/MLCanopyVarCon.F90
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyVarCtl.o ../src/MLCanopyVarCtl.F90
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/SimpleGetPsiHatMod.o share/SimpleGetPsiHatMod.F90
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyFluxesType.o ../src/MLCanopyFluxesType.F90
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLMathToolsMod.o ../src/MLMathToolsMod.F90
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLWaterVaporMod.o ../src/MLWaterVaporMod.F90
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MlLeafPhotosynthesisMod.o ../src/MLLeafPhotosynthesisMod.F90
 ${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLSolarRadiationMod.o ../src/MLSolarRadiationMod.F90
-#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
-#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
-#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
-#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
-#${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyNitrogenProfileMod.o ../src/MLCanopyNitrogenProfileMod.F90
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyWaterMod.o ../src/MLCanopyWaterMod.F90
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLLongwaveRadiationMod.o ../src/MLLongwaveRadiationMod.F90
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLWaterVaporMod.o ../src/MLWaterVaporMod.F90
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLLeafFluxesMod.o ../src/MLLeafFluxesMod.F90
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLSoilFluxesMod.o ../src/MLSoilFluxesMod.F90
+${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/MLCanopyTurbulenceMod.o ../src/MLCanopyTurbulenceMod.F90
 #${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
 #${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/
 #${FC} ${F_OPTS} -I bld/ ${MOD_FLAG} bld/ -o bld/

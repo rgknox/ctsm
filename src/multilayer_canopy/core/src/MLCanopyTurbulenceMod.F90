@@ -14,7 +14,7 @@ module MLCanopyTurbulenceMod
   !
   ! !PUBLIC MEMBER FUNCTIONS:
   public :: CanopyTurbulence        ! Main routine for scalar source/sink fluxes and scalar profiles
-  public :: LookupPsihatINI         ! Initialize the RSL psihat look-up tables
+
   !
   ! !PRIVATE MEMBER FUNCTIONS:
   private :: WellMixed              ! Canopy scalar profiles equal reference height values
@@ -105,6 +105,9 @@ contains
     integer :: p                        ! Patch index for CLM g/l/c/p hierarchy
     integer :: ic                       ! Aboveground layer index
     integer :: il                       ! Sunlit (1) or shaded (2) leaf index
+    integer,parameter :: dummy_pft = -1 ! The math solvers assume a pft index
+                                        ! as an argument, but these functions
+                                        ! dont require it, so we pass a dummy
     real(r8) :: obu0, obu1              ! Initial estimates for Obukhov length (m)
     real(r8) :: tol                     ! Accuracy tolerance for Obukhov length (m)
     real(r8) :: dummy                   ! Dummy argument
@@ -175,7 +178,7 @@ contains
        obu1 = -100._r8         ! Initial estimate for Obukhov length (m)
        tol = 0.1_r8            ! Accuracy tolerance for Obukhov length (m)
 
-       dummy = hybrid ('WellMixed', p, ic, il, mlcanopy_inst, ObuFunc, obu0, obu1, tol)
+       dummy = hybrid ('WellMixed', p, ic, il, dummy_pft, mlcanopy_inst, ObuFunc, obu0, obu1, tol)
 
        ! Scalar profiles and vertical fluxes
 
@@ -265,6 +268,7 @@ contains
     integer  :: p                       ! Patch index for CLM g/l/c/p hierarchy
     integer  :: ic                      ! Aboveground layer index
     integer  :: il                      ! Sunlit (1) or shaded (2) leaf index
+    integer,parameter  :: dummy_pft=-1  ! dummy pft for the math solvers
     real(r8) :: obu0, obu1              ! Initial estimates for Obukhov length (m)
     real(r8) :: tol                     ! Accuracy tolerance for Obukhov length (m)
     real(r8) :: dummy                   ! Dummy argument
@@ -397,7 +401,7 @@ contains
        obu1 = -100._r8         ! Initial estimate for Obukhov length (m)
        tol = 0.1_r8            ! Accuracy tolerance for Obukhov length (m)
 
-       dummy = hybrid ('HF2008', p, ic, il, mlcanopy_inst, ObuFunc, obu0, obu1, tol)
+       dummy = hybrid ('HF2008', p, ic, il, dummy_pft, mlcanopy_inst, ObuFunc, obu0, obu1, tol)
 
        ! Check to see if Obukhov length is changing signs between iterations.
        ! If too many changes in sign, set it to a near-neutral value.
@@ -469,7 +473,7 @@ contains
   end subroutine HF2008
 
   !-----------------------------------------------------------------------
-  subroutine ObuFunc (p, ic, il, mlcanopy_inst, obu_val, obu_dif)
+  subroutine ObuFunc (p, ic, il, dummy_pft, mlcanopy_inst, obu_val, obu_dif)
     !
     ! !DESCRIPTION:
     ! Solve for the Obukhov length. For the current estimate of the Obukhov length
@@ -488,6 +492,7 @@ contains
     integer, intent(in)  :: p               ! Patch index for CLM g/l/c/p hierarchy
     integer, intent(in)  :: ic              ! Aboveground layer index
     integer, intent(in)  :: il              ! Sunlit (1) or shaded (2) leaf index
+    integer, intent(in)  :: dummy_pft       ! Dummy pft is needed because math solver
     real(r8), intent(in) :: obu_val         ! Input value for Obukhov length (m)
     real(r8), intent(out) :: obu_dif        ! Difference in Obukhov length (m)
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
@@ -1984,7 +1989,7 @@ contains
     gamma3 = 1.25_r8
 
     temp = gamma1**2 + gamma2**2 + gamma3**2
-    v1 = temp**-0.5_r8
+    v1 = temp**(-0.5_r8)
     v3 = temp**1.5_r8
     v2 = v3 / 6._r8 - gamma3**2 / (2._r8 * v1)
 

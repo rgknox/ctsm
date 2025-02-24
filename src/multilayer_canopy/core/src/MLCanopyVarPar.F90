@@ -9,20 +9,21 @@ module MLCanopyVarPar
   !
   ! !PUBLIC TYPES:
   implicit none
+  public
   save
 
   public :: MLCanopySetVarPar
   
   ! Parameters for multilayer canopy
 
-  integer, parameter :: nlevmlcan = 100     ! Number of layers in multilayer canopy model
-  integer, parameter :: nleaf = 2           ! Number of leaf types (sunlit and shaded)
-  integer, parameter :: isun = 1            ! Sunlit leaf index
-  integer, parameter :: isha = 2            ! Shaded leaf index
-
-  ! Parameter constants passed in from the host
-  real(r8) :: spval = 1.e36_r8              ! special value for real data
-  integer  :: ispval = -9999                ! special value for int data
+  integer, parameter  :: nlevmlcan = 100     ! Number of layers in multilayer canopy model
+  integer, parameter  :: nleaf = 2           ! Number of leaf types (sunlit and shaded)
+  integer, parameter  :: isun = 1            ! Sunlit leaf index
+  integer, parameter  :: isha = 2            ! Shaded leaf index
+  real(r8), parameter :: spval = 1.e36_r8              ! special value for real data
+  integer, parameter  :: ispval = -9999                ! special value for int data
+  
+  
   integer  :: nlevgrnd                      ! Number of ground layers
   integer  :: numrad                        ! Number of SW radiation bands (vis/nir)
   integer  :: ivis                          ! Index of visible radiation band
@@ -31,21 +32,22 @@ module MLCanopyVarPar
 
 contains
   
-  subroutine MLCanopySetVarPar(varname,rval,ival,cval)
+  subroutine MLCanopySetVarPar(rval,varname)
     
-    integer, optional, intent(in)         :: ival
     real(r8), optional, intent(in)        :: rval
-    character(len=*),optional, intent(in) :: cval
     character(len=*),intent(in)           :: varname
     
     select case(trim(varname))
-    case('spval') spval       = rval
-    case('ispval') ispval     = ival
-    case('nlevgrnd') nlevgrnd = ival
-    case('numrad') numrad     = ival
-    case('ivis') ivis         = ival
-    case('inir') inir         = ival
-    case('iulog') iulog       = ival
+    case('nlevgrnd')
+       nlevgrnd = int(rval)
+    case('numrad')
+       numrad     = int(rval)
+    case('ivis')
+       ivis         = int(rval)
+    case('inir')
+       inir         = int(rval)
+    case('iulog')
+       iulog       = int(rval)
     end select
        
   end subroutine MLCanopySetVarPar

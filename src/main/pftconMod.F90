@@ -1582,6 +1582,7 @@ contains
           mlrad_params%clump_fac(i) = this%clump_fac(i)
           
           mlphoto_params%c3psn(i)  =  int(this%c3psn(i))
+          mlphoto_params%vcmaxpft(i) = this%vcmaxpft(i)
           mlphoto_params%g0_BB(i)  =  this%g0_BB(i)
           mlphoto_params%g1_BB(i)  =  this%g1_BB(i)
           mlphoto_params%g0_MED(i) =  this%g0_MED(i)

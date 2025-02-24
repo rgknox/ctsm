@@ -19,15 +19,15 @@ module MLCanopyNitrogenProfileMod
   contains
 
   !-----------------------------------------------------------------------
-  subroutine CanopyNitrogenProfile (num_filter, filter, mlcanopy_inst)
+  subroutine CanopyNitrogenProfile (num_filter, filter, mlcanopy_inst, pft)
     !
     ! !DESCRIPTION:
     ! Canopy profile of nitrogen and photosynthetic capacity
     !
     ! !USES:
     use MLCanopyVarCon, only : tfrz
-    use PatchType, only : patch
-    use pftconMod, only : pftcon
+    use MLSolarRadiationMod, only : mlrad_params
+    use MLLeafPhotosynthesisMod, only : mlphoto_params
     use MLCanopyVarCon, only : jmax25_to_vcmax25_noacclim, jmax25_to_vcmax25_acclim
     use MLCanopyVarCon, only : rd25_to_vcmax25_c3, rd25_to_vcmax25_c4, kp25_to_vcmax25_c4
     use MLCanopyVarCtl, only : acclim_type, kn_val, leaf_optics_type
@@ -39,6 +39,8 @@ module MLCanopyNitrogenProfileMod
     integer, intent(in) :: num_filter   ! Number of patches in filter
     integer, intent(in) :: filter(:)    ! Patch filter
     type(mlcanopy_type), intent(inout) :: mlcanopy_inst
+    integer, intent(in) :: pft(:)       ! plant functional type associated with the filter index (patch)
+
     !
     ! !LOCAL VARIABLES:
     integer  :: fp                      ! Filter index
@@ -58,9 +60,9 @@ module MLCanopyNitrogenProfileMod
 
     associate ( &
                                                           ! *** Input ***
-    c3psn           => pftcon%c3psn                  , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
-    vcmaxpft        => pftcon%vcmaxpft               , &  ! CLMml: Maximum carboxylation rate at 25C (umol/m2/s)
-    clump_fac       => pftcon%clump_fac              , &  ! CLMml: Foliage clumping index (-)
+    c3psn           => mlphoto_params%c3psn          , &  ! Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
+    vcmaxpft        => mlphoto_params%vcmaxpft       , &  ! Maximum carboxylation rate at 25C (umol/m2/s)
+    clump_fac       => mlrad_params%clump_fac        , &  ! Foliage clumping index (-)
     tacclim         => mlcanopy_inst%tacclim_forcing , &  ! Average air temperature for acclimation (K)
     ncan            => mlcanopy_inst%ncan_canopy     , &  ! Number of aboveground layers
     lai             => mlcanopy_inst%lai_canopy      , &  ! Leaf area index of canopy (m2/m2)
@@ -85,7 +87,7 @@ module MLCanopyNitrogenProfileMod
 
        ! Vcmax and other parameters (at 25C and top of canopy)
 
-       vcmax25top = vcmaxpft(patch%itype(p))
+       vcmax25top = vcmaxpft(pft(fp))
 
        select case (acclim_type)
        case (0)
@@ -97,11 +99,11 @@ module MLCanopyNitrogenProfileMod
           call endrun (msg=' ERROR: CanopyNitrogenProfile: acclim_type not valid')             
        end select
 
-       if (nint(c3psn(patch%itype(p))) == 1) then
+       if (nint(c3psn(pft(fp))) == 1) then
           jmax25top = jmax25_to_vcmax25 * vcmax25top
           rd25top = rd25_to_vcmax25_c3 * vcmax25top
           kp25top = 0._r8
-       else if (nint(c3psn(patch%itype(p))) == 0) then
+       else if (nint(c3psn(pft(fp))) == 0) then
           jmax25top = 0._r8
           rd25top = rd25_to_vcmax25_c4 * vcmax25top
           kp25top = kp25_to_vcmax25_c4 * vcmax25top
@@ -152,9 +154,9 @@ module MLCanopyNitrogenProfileMod
              fn = exp(-kn * pai_above) * (1._r8 - exp(-kn * dpai(p,ic))) / kn
              select case (leaf_optics_type)
              case (0)
-                fn_sun = clump_fac(patch%itype(p)) / (kn + kb(p,ic) * clump_fac(patch%itype(p))) &
+                fn_sun = clump_fac(pft(fp)) / (kn + kb(p,ic) * clump_fac(pft(fp))) &
                        * exp(-kn * pai_above) * tbi(p,ic) &
-                       * (1._r8 - exp(-(kn + kb(p,ic)*clump_fac(patch%itype(p))) * dpai(p,ic)))
+                       * (1._r8 - exp(-(kn + kb(p,ic)*clump_fac(pft(fp))) * dpai(p,ic)))
                 fn_sha = fn - fn_sun
                 nscale_sun = fn_sun / (fracsun(p,ic) * dpai(p,ic))
                 nscale_sha = fn_sha / ((1._r8 - fracsun(p,ic)) * dpai(p,ic))

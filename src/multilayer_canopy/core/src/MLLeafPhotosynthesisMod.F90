@@ -29,7 +29,8 @@ module MLLeafPhotosynthesisMod
   
   
   type, public :: mlphoto_params_type
-     integer(r8), allocatable :: c3psn(:)     ! Photosynthetic pathway (1 = C3 plant, 0 = C4 plant)
+     integer(r8), allocatable :: c3psn(:)  ! Photosynthetic pathway (1 = C3 plant, 0 = C4 plant)
+     real(r8), allocatable :: vcmaxpft(:)  ! Maximum carboxylation rate at 25C (umol/m2/s)
      real(r8), allocatable :: g0_BB(:)     ! Ball-Berry minimum leaf conductance (mol H2O/m2/s)
      real(r8), allocatable :: g1_BB(:)     ! Ball-Berry slope of conductance-photosynthesis relationship
      real(r8), allocatable :: g0_MED(:)    ! Medlyn minimum leaf conductance (mol H2O/m2/s)
@@ -49,7 +50,8 @@ contains
       
     integer,intent(in) :: n_pft
     
-    allocate(mlphoto_params%c3psn(0:n_pft)) 
+    allocate(mlphoto_params%c3psn(0:n_pft))
+    allocate(mlphoto_params%vcmaxpft(0:n_pft))
     allocate(mlphoto_params%g0_BB(0:n_pft))
     allocate(mlphoto_params%g1_BB(0:n_pft))
     allocate(mlphoto_params%g0_MED(0:n_pft))
@@ -752,7 +754,7 @@ contains
 
     associate ( &
                                                ! *** Input ***
-    c3psn  => mlphoto_params%c3psn                , &  ! CLM: Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
+    c3psn  => mlphoto_params%c3psn        , &  ! Photosynthetic pathway (1. = C3 plant, 0. = C4 plant)
     o2ref  => mlcanopy_inst%o2ref_forcing , &  ! Atmospheric O2 at reference height (mmol/mol)
     dpai   => mlcanopy_inst%dpai_profile  , &  ! Canopy layer plant area index (m2/m2)
     cair   => mlcanopy_inst%cair_profile  , &  ! Canopy layer atmospheric CO2 (umol/mol)

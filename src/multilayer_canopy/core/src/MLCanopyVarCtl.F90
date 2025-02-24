@@ -5,7 +5,8 @@ module MLCanopyVarCtl
   ! Module containing multilayer canopy model run control variables
   !
   ! !USES:
-  use MLCanopyVarCon, only : ispval
+  use MLCanopyVarPar, only : ispval
+  use MLCanopyVarPar, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   !
   ! !PUBLIC TYPES:
@@ -67,7 +68,7 @@ contains
     character(len=*), intent(in) :: msg    ! string to be printed
     !-----------------------------------------------------------------------
     
-    write(log_unit,*)'ML-ENDRUN:', msg
+    write(iulog,*)'ML-ENDRUN:', msg
     call shr_sys_abort()
     
   end subroutine endrun

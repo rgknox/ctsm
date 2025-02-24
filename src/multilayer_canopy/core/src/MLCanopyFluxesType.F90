@@ -6,7 +6,7 @@ module MLCanopyFluxesType
   !
   ! !USES:
   use MLCanopyVarCtl, only : endrun
-  use MLCanopyVarCon, only : ispval, spval
+  use MLCanopyVarPar, only : ispval, spval
   use MLCanopyVarPar, only : nlevgrnd, numrad
   use shr_kind_mod, only : r8 => shr_kind_r8
   use MLCanopyVarPar, only : nlevmlcan, nleaf, nlevgrnd
@@ -343,9 +343,11 @@ module MLCanopyFluxesType
 
   contains
 
-    procedure, private :: InitAllocate      ! CLM initialization: allocate module data structure
-    procedure, private :: InitCold          ! CLM initialization: cold-start initialization
-
+    procedure, private :: InitAllocate      ! Allocate module data structure
+    procedure, private :: InitCold          ! Cold-start initialization
+    procedure, private :: InitHistory       ! Register history variables and associate pointers
+    procedure, private :: Restart
+    
   end type mlcanopy_type
   !-----------------------------------------------------------------------
 
@@ -693,7 +695,7 @@ contains
     integer :: begp, endp
     !---------------------------------------------------------------------
 
-    begp = mlcanopy_inst%begp ; endp= mlcanopy_inst%endp
+    begp = this%begp ; endp= this%endp
 
     !this%gppveg_canopy(begp:endp) = spval
     !call hist_addfld1d (fname='GPP_ML', units='umol/m2s', &
@@ -731,7 +733,7 @@ contains
 
     ! Initialize leaf water potential and intercepted water
 
-    do p = mlcanopy_inst%begp, mlcanopy_inst%endp
+    do p = this%begp, this%endp
        do ic = 1, nlevmlcan
           this%lwp_leaf(p,ic,isun) = -0.1_r8
           this%lwp_leaf(p,ic,isha) = -0.1_r8

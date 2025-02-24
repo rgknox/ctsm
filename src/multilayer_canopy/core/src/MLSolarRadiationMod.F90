@@ -13,6 +13,7 @@ module MLSolarRadiationMod
   use MLCanopyVarPar, only : iulog
   use shr_kind_mod, only : r8 => shr_kind_r8
   use MLCanopyFluxesType, only : mlcanopy_type
+  use MLCanopyVarPar, only : numrad
   !
   ! !PUBLIC TYPES:
   implicit none
@@ -324,10 +325,10 @@ contains
     implicit none
     integer , intent(in) :: num_filter                                           ! Number of patches in filter
     integer , intent(in) :: filter(:)                                            ! Patch filter
+    type(mlcanopy_type), intent(inout) :: mlcanopy_inst
     real(r8), intent(in) :: rho(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)    ! Leaf/stem reflectance
     real(r8), intent(in) :: tau(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)    ! Leaf/stem transmittance
     real(r8), intent(in) :: omega(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,1:numrad)  ! Leaf/stem scattering coefficient
-    type(mlcanopy_type), intent(inout) :: mlcanopy_inst
     !
     ! !LOCAL VARIABLES:
     integer  :: fp                                               ! Filter index
@@ -613,12 +614,12 @@ contains
     implicit none
     integer,  intent(in) :: num_filter                                        ! Number of patches in filter
     integer,  intent(in) :: filter(:)                                         ! Patch filter
+    type(mlcanopy_type), intent(inout) :: mlcanopy_inst
     real(r8), intent(in) :: omega(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad) ! Leaf/stem scattering coefficient
     real(r8), intent(in) :: avmu(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan)         ! Average inverse diffuse optical depth per unit leaf area
     real(r8), intent(in) :: betad(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad) ! Upscatter parameter for diffuse radiation
     real(r8), intent(in) :: betab(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan,numrad) ! Upscatter parameter for direct beam radiation
     real(r8), intent(in) :: clump_fac_ic(mlcanopy_inst%begp:mlcanopy_inst%endp,1:nlevmlcan) ! Foliage clumping index (-)
-    type(mlcanopy_type), intent(inout) :: mlcanopy_inst
     !
     ! !LOCAL VARIABLES:
     integer  :: fp                                                            ! Filter index

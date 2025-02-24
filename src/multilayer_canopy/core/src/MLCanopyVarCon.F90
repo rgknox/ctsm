@@ -19,7 +19,7 @@ module MLCanopyVarCon
   real(r8), public :: grav   = SHR_CONST_G                          ! gravity constant [m/s2]
   real(r8), public :: sb     = SHR_CONST_STEBOL                     ! stefan-boltzmann constant  [W/m2/K4]
   real(r8), public :: vkc    = SHR_CONST_KARMAN                     ! von Karman constant [-]
-  real(r8), public :: pi     = SHR_CONST_PI
+  real(r8), public :: rpi    = SHR_CONST_PI
   real(r8), public :: cpliq  = SHR_CONST_CPFW                       ! Specific heat of water [J/kg-K]
   real(r8), public, parameter :: tfrz   = SHR_CONST_TKFRZ           ! freezing temperature [K]
 
